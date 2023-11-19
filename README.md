@@ -4,7 +4,7 @@ PowerChain is a platform that allows energy actors to record and exchange energy
 ## Work In Progress...
 
 ## Userful Documentation
-Web3.py: https://web3py.readthedocs.io/
+Web3.py: https://web3py.readthedocs.io/ \
 py-solc-x: https://solcx.readthedocs.io/en/latest/
 
 ## Licensing
