@@ -1,0 +1,30 @@
+#!/bin/bash
+source tools.sh
+
+#Get user name:
+echo "Give a user name:"
+read name
+user_dir=$(pwd)/$name
+
+echo "User host (default localhost) : "
+read host
+if [ -z "$host" ]; then
+    host="localhost"
+fi
+
+mkdir $user_dir
+
+echo "Generating User $user_dir..."
+geth --datadir "$user_dir" account new
+for file in "$user_dir/keystore"/*; do
+    filename=$(basename "$file")
+    tmp=$IFS
+    IFS="-"
+    read -ra parts <<< "$filename"
+    IFS=$tmp
+    address=${parts[-1]}
+done
+
+#Create start.sh script:
+createStartScript $user_dir "0x$address" $host " "
+echo "Done!"

@@ -1,0 +1,7 @@
+network
+besu
+/scripts/__pycache__
+/scripts/config/conf.json
+.vscode
+/contracts/*.json
+/ui/node_modules

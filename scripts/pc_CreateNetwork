@@ -1,0 +1,76 @@
+#!/bin/bash
+source tools.sh
+
+PLACEHOLDER_ADMIN="<ADMIN>"
+PLACEHOLDER_VALIDATORS="<VALIDATORS>"
+
+NETWORK_FOLDER="./network"
+SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+echo "***********************************************************************************************"
+echo "This script should only be used once to generate the validator keys and create the genesis file"
+echo "            The genesis file can be then passed to peers to join the network"
+echo "***********************************************************************************************"
+sleep 3
+
+if [ ! -d "$NETWORK_FOLDER" ]; then
+    mkdir "$NETWORK_FOLDER"
+fi
+
+echo "Host (defailt localhost): "
+read host
+
+if [ -z "$host" ]; then
+    host="localhost"
+fi
+
+#Generate bootnode:
+bootnode_dir=$NETWORK_FOLDER/bootnode
+mkdir "$bootnode_dir"
+createBootNode $bootnode_dir $host
+
+#Generate validator addresses:
+echo "Number of validators (Default:4): "
+read validators
+if [ -z "$validators" ]; then
+    validators=4
+fi
+
+v=0
+while [ "$validators" != "$v" ]; do
+    validator_dir=$NETWORK_FOLDER/validator_$v
+    mkdir $validator_dir
+    echo "*********************************************"
+    echo "Generating Validator $v..."
+    geth --datadir "$validator_dir" account new
+    for file in "$validator_dir/keystore"/*; do
+        filename=$(basename "$file")
+        tmp=$IFS
+        IFS="-"
+        read -ra parts <<< "$filename"
+        IFS=$tmp
+        address=${parts[-1]}
+        if [ -z "$validator_addresses" ]; then
+            admin=$address
+        fi
+        validator_addresses="$validator_addresses$address"
+    done
+    createStartScript $validator_dir $address $host "X"
+    v=$(expr $v + 1)
+    echo "Validator $v generater..."
+done
+
+#Create genesis file
+echo "Generating genesis file..."
+cp $SCRIPTPATH/config/genesis.json $NETWORK_FOLDER/genesis.json
+admin="0x$admin"
+sed -i "s/$PLACEHOLDER_ADMIN/$admin/g" "$NETWORK_FOLDER/genesis.json"
+sed -i "s/$PLACEHOLDER_VALIDATORS/$validator_addresses/g" "$NETWORK_FOLDER/genesis.json"
+v=0
+while [ "$validators" != "$v" ]; do
+    validator_dir=$NETWORK_FOLDER/validator_$v
+    cp $NETWORK_FOLDER/genesis.json $validator_dir
+    v=$(expr $v + 1)
+done
+
+echo "Done..."
