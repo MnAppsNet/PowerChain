@@ -11,20 +11,21 @@ echo "**************************************************************************
 echo "This script should only be used once to generate the validator keys and create the genesis file"
 echo "            The genesis file can be then passed to peers to join the network"
 echo "***********************************************************************************************"
+echo "For each validator you will have to define a password for your wallet and a master password for"
+echo "the signer. The singer is used to avoid unlocking the wallet and have RPC exposed. You will be "
+echo "asked multiple times to enter either your wallet password of the signer password.              "
 sleep 3
 
 if [ ! -d "$NETWORK_FOLDER" ]; then
     mkdir "$NETWORK_FOLDER"
 fi
-
-echo "Host (defailt localhost): "
-read host
-
-if [ -z "$host" ]; then
-    host="localhost"
-fi
-
+clear
 #Generate bootnode:
+echo "***********************"
+echo "* Setting up BootNode *"
+echo "***********************"
+echo " "
+host=$(readHost)
 bootnode_dir=$NETWORK_FOLDER/bootnode
 mkdir "$bootnode_dir"
 createBootNode $bootnode_dir $host
@@ -38,11 +39,22 @@ fi
 
 v=0
 while [ "$validators" != "$v" ]; do
+    clear
+    echo "**************************"
+    echo "* Setting up validator $v*"
+    echo "****************************************************************************************"
+    echo "* You will be asked to provide a password for your address and then a master password  *"
+    echo "* for an external signer. Then you will be asked to associate your address password    *"
+    echo "* with the external signer so you don't have to unlock your address everytime and have *"
+    echo "* the JSON-RPC API exposed. The signer will validate the RPC calls without unlocking   *"
+    echo "* the address in geth.                                                                 *"
+    echo "****************************************************************************************"
+    echo " "
+    host=$(readHost)
     validator_dir=$NETWORK_FOLDER/validator_$v
     mkdir $validator_dir
-    echo "*********************************************"
-    echo "Generating Validator $v..."
-    geth --datadir "$validator_dir" account new
+    
+    geth --datadir "$validator_dir" account new --verbosity 1
     for file in "$validator_dir/keystore"/*; do
         filename=$(basename "$file")
         tmp=$IFS
@@ -57,7 +69,7 @@ while [ "$validators" != "$v" ]; do
     done
     createStartScript $validator_dir $address $host "X"
     v=$(expr $v + 1)
-    echo "Validator $v generater..."
+    echo "Validator $v generated..."
 done
 
 #Create genesis file
@@ -70,6 +82,7 @@ v=0
 while [ "$validators" != "$v" ]; do
     validator_dir=$NETWORK_FOLDER/validator_$v
     cp $NETWORK_FOLDER/genesis.json $validator_dir
+    cp $NETWORK_FOLDER/bootnodes.txt $validator_dir
     v=$(expr $v + 1)
 done
 

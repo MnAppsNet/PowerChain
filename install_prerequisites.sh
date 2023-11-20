@@ -16,10 +16,10 @@ else
 fi
 
 #Install Python
-sudo apt install python3
+sudo apt install python3 python3-dev
 
 #Install Web3.py
-pip install --upgrade web3 web3quorum py-solc-x
+python -m pip install cython cytoolz web3 py-solc-x
 
 #Install node
 sudo apt-get install -y ca-certificates curl gnupg

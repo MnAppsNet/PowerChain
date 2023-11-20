@@ -71,13 +71,16 @@ createStartScript() {
 setSignerPassword(){
     local path=$1
     local address=$2
-    echo "Add node password to external signer"
+    echo "Associate address password with signer"
+    sleep 1
     clef --keystore $path/keystore --configdir $path/clef --chainid $CHAIN_ID --suppress-bootwarn setpw 0x$address
+    echo "**************************************"
 }
 
 createSigner(){
     local path=$1
-    echo "Set a master password for the external RPC signer"
+    echo "Set the signer master password"
+    sleep 1
     clef --keystore $path/keystore --configdir $path/clef --chainid $CHAIN_ID --suppress-bootwarn init
     cp $SCRIPTPATH/config/AuthRules.js $path/rules.js
     rules='''`sha256sum $SCRIPTPATH/rules.js | cut -f1`'''
@@ -92,4 +95,14 @@ fi
 clef --keystore \$SCRIPTPATH/keystore --configdir \$SCRIPTPATH/clef --chainid $CHAIN_ID --suppress-bootwarn --rules \$SCRIPTPATH/rules.js
 END
     chmod +x "$path/startSigner.sh"
+    echo "**************************************"
+}
+
+readHost(){
+    echo -n "Host (default localhost): "
+    read host
+    if [ -z "$host" ]; then
+        host="localhost"
+    fi
+    return $host
 }
