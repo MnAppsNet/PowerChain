@@ -14,7 +14,7 @@ function App() {
 
   class Tools {
     static strings = Languages.EN
-    static RpcUrl = ""
+    static RpcUrl = () => RpcUrl
     static showMessage = (text,error=true) => {
       setMessageStatus((error)?"error":"info")
       setMessageText(text)
@@ -23,7 +23,9 @@ function App() {
     static clearMessage = () => {
       setMessageText("")
     }
-    static setRpcUrl = setRpcUrl
+    static setRpcUrl = (url) => {
+      setRpcUrl(url)
+    }
     static disconect = () => {
       setRpcUrl("")
     }
@@ -32,9 +34,6 @@ function App() {
   useEffect(() => {
     Tools.strings = Languages[Language]
   }, [Language]);
-  useEffect(() => {
-    Tools.RpcUrl = RpcUrl
-  }, [RpcUrl]);
 
   return (
     <div className={styles.main}>

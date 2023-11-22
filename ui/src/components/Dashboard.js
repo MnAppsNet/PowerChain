@@ -10,7 +10,7 @@ const Dashboard = (props) => {
     const [connected, setConnected] = useState(false);
 
     const Tools = props.Tools
-    const web3 = new Web3(Tools.RpcUrl);
+    const web3 = new Web3(Tools.RpcUrl());
     web3.eth.net.isListening()
     .then(() => {
         setConnected(true)
