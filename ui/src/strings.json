@@ -1,0 +1,13 @@
+{
+    "EN":{
+        "connect":"Connect",
+        "providerUrl":"Provider RPC URL",
+        "invalidUrl":"Please provide a valid URL",
+        "connecting":"Connecting...",
+        "failedToConnect":"Connection failed, make sure the RPC url is correct..."
+    },
+    "GR":{
+        "connect":"Σύνδεση",
+        "providerUrl":"Σύνδεσμος RPC του παρόχου"
+    }
+}
