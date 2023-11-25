@@ -5,3 +5,4 @@ besu
 .vscode
 /contracts/*.json
 /ui/node_modules
+/ui/src/addresses.json

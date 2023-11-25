@@ -1,13 +1,13 @@
 {
     "EN":{
-        "connect":"Connect",
+        "connect":"Connect with MetaMask",
         "providerUrl":"Provider RPC URL",
         "invalidUrl":"Please provide a valid URL",
         "connecting":"Connecting...",
         "failedToConnect":"Connection failed, make sure the RPC url is correct..."
     },
     "GR":{
-        "connect":"Σύνδεση",
+        "connect":"Σύνδεση με MetaMask",
         "providerUrl":"Σύνδεσμος RPC του παρόχου"
     }
 }

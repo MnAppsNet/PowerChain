@@ -26,11 +26,16 @@ if [ ! -e $GENESIS_FILE ]; then
 fi
 
 #Get port
-if [ "$PREDEFINED_PORT" == "<PREDEFINED_PORT>" ]; then
-    echo "Give a port to use (default = 30305):"
-    read port
+if [[ "$PREDEFINED_PORT" == *"PREDEFINED_PORT"* ]]; then
+    if [ ! -z "$1" ]; then
+        port=$1
+    else
+        echo "Give a port to use (default = 30305):"
+        read port
+    fi
+    
     if [ -z "$port" ]; then
-        P2P_PORT=30305
+        P2P_PORT=30301
     else
         P2P_PORT="$port"
     fi
@@ -61,9 +66,9 @@ if [ -e "$bootNodesFile" ]; then
         geth --datadir $SCRIPTPATH init $GENESIS_FILE
     fi
     if [ $MINER == "X" ]; then
-        geth --datadir $SCRIPTPATH --port $P2P_PORT --bootnodes $bootNodes  --networkid $NETWOK_ID --authrpc.addr $HOST --authrpc.port $RPC_PORT --authrpc.vhosts "*" --signer $SIGNER --mine --miner.etherbase "0x$ADDRESS" --http --http.api eth,net,web3 --http.port $HTTP_PORT --http.addr $HOST
+        geth --datadir $SCRIPTPATH --port $P2P_PORT --bootnodes $bootNodes  --networkid $NETWOK_ID --authrpc.addr $HOST --authrpc.port $RPC_PORT --authrpc.vhosts "*" --signer $SIGNER --mine --miner.etherbase "0x$ADDRESS" --http --http.api eth,net,web3 --http.port $HTTP_PORT --http.addr $HOST --http.corsdomain '*'
     else
-        geth --datadir $SCRIPTPATH --port $P2P_PORT --bootnodes $bootNodes  --networkid $NETWOK_ID --authrpc.addr $HOST --authrpc.port $RPC_PORT --authrpc.vhosts "*" --http --http.api eth,net,web3 --http.port $HTTP_PORT --http.addr $HOST
+        geth --datadir $SCRIPTPATH --port $P2P_PORT --bootnodes $bootNodes  --networkid $NETWOK_ID --authrpc.addr $HOST --authrpc.port $RPC_PORT --authrpc.vhosts "*" --http --http.api eth,net,web3 --http.port $HTTP_PORT --http.addr $HOST --http.corsdomain '*'
     fi
 else
     echo "/!\\ Please put at least one boot node in a file '$BOOTNODES_FILE' to be able to discover network peers /!\\"

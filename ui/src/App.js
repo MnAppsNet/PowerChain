@@ -4,17 +4,17 @@ import Message from "./components/Message";
 import Dashboard from "./components/Dashboard"
 import styles from "./styles.css";
 import Languages from "./strings.json"
+import Web3 from "web3";
 
 function App() {
-  
-  const [RpcUrl, setRpcUrl] = useState("");
+  const [web3, setWeb3] = useState(null);
   const [Language, setLanguage] = useState("EN");
   const [MessageText, setMessageText] = useState("");
   const [MessageStatus, setMessageStatus] = useState("");
 
   class Tools {
     static strings = Languages.EN
-    static RpcUrl = () => RpcUrl
+    static web3 = () => web3
     static showMessage = (text,error=true) => {
       setMessageStatus((error)?"error":"info")
       setMessageText(text)
@@ -23,11 +23,11 @@ function App() {
     static clearMessage = () => {
       setMessageText("")
     }
-    static setRpcUrl = (url) => {
-      setRpcUrl(url)
+    static setWeb3 = (w) => {
+      setWeb3(w)
     }
     static disconect = () => {
-      setRpcUrl("")
+      setWeb3(null)
     }
   }
 
@@ -38,7 +38,7 @@ function App() {
   return (
     <div className={styles.main}>
       {MessageText != "" ? (<Message Tools={Tools} text={MessageText} status={MessageStatus}></Message>):("")}
-      {RpcUrl == "" ? (
+      {web3 == null ? (
         <Login Tools={Tools}></Login>
       ) : (
         <Dashboard Tools={Tools}></Dashboard>

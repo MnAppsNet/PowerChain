@@ -1,16 +1,8 @@
 #!/usr/bin/python3
-import argparse, os, json
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
-from solcx import compile_source, install_solc
-from pprint import pprint
-
-SOLC_VERSION="0.8.20"
-EVM_VERSION="paris"
+import argparse, os
+from tools import deployContract
 
 try:
-
-    install_solc(SOLC_VERSION)
 
     parser = argparse.ArgumentParser(description='Deploy Smart Contract')
     parser.add_argument('path', type=str,
@@ -28,36 +20,8 @@ try:
         print("Please provide a valid geth.icp file or run the script in a folder with a geth.icp file")
         print("Make sure the account you are connecting to has some gas")
         exit(0)
-    w3 = Web3(Web3.IPCProvider(args.icp,timeout=15))
-    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
-    #Compile contract
-    if ( not os.path.exists(args.path) ):
-        print(f"File '{args.path}' not found...")
-        exit(0)
-    with open(args.path, "r") as file:
-        source = file.read()
-    compiled_sol = compile_source(source,output_values=['abi', 'bin'],evm_version=EVM_VERSION,solc_version=SOLC_VERSION)
-    contract_id, contract_interface = compiled_sol.popitem()
-    abi = contract_interface['abi']
-    bytecode = contract_interface['bin']
-
-    #Deploy Contract
-    w3.eth.default_account = w3.eth.accounts[0]
-    contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    tx_hash = contract.constructor().transact()
-    tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
-    contract = {
-        "name":os.path.basename(args.path),
-        "address":tx_receipt.contractAddress,
-        "abi":abi
-    }
-    print("Smart Contract Deployed!")
-    print(f"Contract Address: {tx_receipt.contractAddress}")
-    pprint(abi)
-    contract_file = args.path + ".json"
-    with open(contract_file, "w") as outfile:
-        json.dump(contract, outfile)
+    
+    deployContract(args.icp,args.path)
 
 except Exception as e:
     raise e

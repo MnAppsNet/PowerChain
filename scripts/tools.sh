@@ -1,4 +1,4 @@
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GENESIS_FILE="genesis.json"
 CHAIN_ID=4200
 PORT_PLACEHOLDER="<PREDEFINED_PORT>"
@@ -86,8 +86,9 @@ createSigner(){
     rules='''`sha256sum $SCRIPTPATH/rules.js | cut -f1`'''
     cat << END > $path/startSigner.sh
 #!/bin/bash
-SCRIPTPATH="\$( cd -- \"\$(dirname \"\$0\")\" >/dev/null 2>\&1 ; pwd -P )"
-if find "\$SCRIPTPATH/clef" -type f -name "config.json" | grep -q "config.json"; then
+SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+confFile=$(find "$SCRIPTPATH/clef" -type f -name "config.json")
+if [ ! -z "$confFile" ]; then
     echo "Rules already attested"
 else
     clef --keystore \$SCRIPTPATH/keystore --configdir \$SCRIPTPATH/clef --chainid $CHAIN_ID --suppress-bootwarn attest $rules
@@ -99,10 +100,9 @@ END
 }
 
 readHost(){
-    echo -n "Host (default localhost): "
     read host
     if [ -z "$host" ]; then
         host="localhost"
     fi
-    return $host
+    echo $host
 }

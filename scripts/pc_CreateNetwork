@@ -5,7 +5,7 @@ PLACEHOLDER_ADMIN="<ADMIN>"
 PLACEHOLDER_VALIDATORS="<VALIDATORS>"
 
 NETWORK_FOLDER="./network"
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "***********************************************************************************************"
 echo "This script should only be used once to generate the validator keys and create the genesis file"
@@ -14,17 +14,17 @@ echo "**************************************************************************
 echo "For each validator you will have to define a password for your wallet and a master password for"
 echo "the signer. The singer is used to avoid unlocking the wallet and have RPC exposed. You will be "
 echo "asked multiple times to enter either your wallet password of the signer password.              "
-sleep 3
 
 if [ ! -d "$NETWORK_FOLDER" ]; then
     mkdir "$NETWORK_FOLDER"
 fi
-clear
+echo ""
 #Generate bootnode:
 echo "***********************"
 echo "* Setting up BootNode *"
 echo "***********************"
-echo " "
+echo ""
+echo -n "Host (default localhost): "
 host=$(readHost)
 bootnode_dir=$NETWORK_FOLDER/bootnode
 mkdir "$bootnode_dir"
@@ -42,19 +42,20 @@ while [ "$validators" != "$v" ]; do
     clear
     echo "**************************"
     echo "* Setting up validator $v*"
-    echo "****************************************************************************************"
-    echo "* You will be asked to provide a password for your address and then a master password  *"
-    echo "* for an external signer. Then you will be asked to associate your address password    *"
-    echo "* with the external signer so you don't have to unlock your address everytime and have *"
-    echo "* the JSON-RPC API exposed. The signer will validate the RPC calls without unlocking   *"
-    echo "* the address in geth.                                                                 *"
-    echo "****************************************************************************************"
-    echo " "
+    echo "********************************************************************************************"
+    echo "* You will be asked to provide a password for your address and then a master password      *"
+    echo "* for an external signer (CLEF). Then you will be asked to associate your address password *"
+    echo "* with the external signer so you don't have to unlock your address everytime and have     *"
+    echo "* the JSON-RPC API exposed. The signer will validate the RPC calls without unlocking       *"
+    echo "* the address in geth.                                                                     *"
+    echo "********************************************************************************************"
+    echo ""
+    echo -n "Host (default localhost): "
     host=$(readHost)
     validator_dir=$NETWORK_FOLDER/validator_$v
     mkdir $validator_dir
     
-    geth --datadir "$validator_dir" account new --verbosity 1
+    geth --datadir "$validator_dir" account new
     for file in "$validator_dir/keystore"/*; do
         filename=$(basename "$file")
         tmp=$IFS
