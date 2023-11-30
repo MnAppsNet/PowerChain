@@ -1,4 +1,5 @@
 <img src="./ui/public/logo192.png" alt="PowerChain" align="right">
+
 # PowerChain &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/MnAppsNet/PowerChain/blob/master/LICENSE)
 PowerChain is a platform that allows energy actors to record and exchange energy assets on a private blockchain network.
 
