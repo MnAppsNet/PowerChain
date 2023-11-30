@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react'
 import {
+  ChakraProvider,
   IconButton,
   Box,
   CloseButton,
@@ -24,28 +25,30 @@ const LinkItems = [
   { name: 'Home', icon: FiHome },
 ]
 
-const Sidebar = () => {
+const Sidebar = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
-      <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
-      <Drawer
-        isOpen={isOpen}
-        placement="left"
-        onClose={onClose}
-        returnFocusOnClose={false}
-        onOverlayClick={onClose}
-        size="full">
-        <DrawerContent>
-          <SidebarContent onClose={onClose} />
-        </DrawerContent>
-      </Drawer>
-      {/* mobilenav */}
-      <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} p="4">
-        {/* Content */}
+    <ChakraProvider resetCSS>
+      <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+        <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
+        <Drawer
+          isOpen={isOpen}
+          placement="left"
+          onClose={onClose}
+          returnFocusOnClose={false}
+          onOverlayClick={onClose}
+          size="full">
+          <DrawerContent>
+            <SidebarContent onClose={onClose} />
+          </DrawerContent>
+        </Drawer>
+        {/* mobilenav */}
+        <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
+        <Box ml={{ base: 0, md: 60 }} p="4">
+          { children }
+        </Box>
       </Box>
-    </Box>
+    </ChakraProvider>
   )
 }
 

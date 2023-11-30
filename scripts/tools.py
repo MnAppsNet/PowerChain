@@ -1,4 +1,4 @@
-import json
+import json, os
 from solcx import compile_source, install_solc
 from pprint import pprint
 from web3 import Web3
@@ -6,6 +6,17 @@ from web3.middleware import geth_poa_middleware
 
 SOLC_VERSION="0.8.20"
 EVM_VERSION="paris"
+
+def sendEth(icp,account,amount):
+    w3 = Web3(Web3.IPCProvider(icp,timeout=15))
+    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    tx_hash = w3.eth.send_transaction({
+        "from": w3.eth.accounts[0],
+        "to": account,
+        "value": amount
+    })
+    tx =  w3.eth.get_transaction(tx_hash)
+    pprint(tx)
 
 def deployContract(icp,path):
 
@@ -38,6 +49,8 @@ def deployContract(icp,path):
     print("Smart Contract Deployed!")
     print(f"Contract Address: {tx_receipt.contractAddress}")
     pprint(abi)
-    contract_file = args.path + ".json"
+    contract_file = path + ".json"
     with open(contract_file, "w") as outfile:
         json.dump(contract, outfile)
+
+    return tx_receipt.contractAddress

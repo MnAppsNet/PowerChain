@@ -86,9 +86,9 @@ createSigner(){
     rules='''`sha256sum $SCRIPTPATH/rules.js | cut -f1`'''
     cat << END > $path/startSigner.sh
 #!/bin/bash
-SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-confFile=$(find "$SCRIPTPATH/clef" -type f -name "config.json")
-if [ ! -z "$confFile" ]; then
+SCRIPTPATH="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+confFile=\$(find "\$SCRIPTPATH/clef" -type f -name "config.json")
+if [ ! -z "\$confFile" ]; then
     echo "Rules already attested"
 else
     clef --keystore \$SCRIPTPATH/keystore --configdir \$SCRIPTPATH/clef --chainid $CHAIN_ID --suppress-bootwarn attest $rules

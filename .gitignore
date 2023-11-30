@@ -6,3 +6,4 @@ besu
 /contracts/*.json
 /ui/node_modules
 /ui/src/addresses.json
+/ui/src/contracts/*.json

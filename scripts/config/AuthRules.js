@@ -1,8 +1,10 @@
 function OnSignerStartup(info){}
 
-function ApproveListing(){
+function ApproveListing(req){
     // Approve listings if request made from IPC
-    if (req.metadata.scheme == "ipc"){ return "Approve"}
+    console.log(req.metadata)
+    console.log(req.metadata.scheme)
+    return "Approve"
 }
 
 function ApproveSignData(r){
@@ -18,11 +20,15 @@ function ApproveSignData(r){
     return "Reject"
 }
 
-function ApproveTx(r) {
+function OnApprovedTx(req){
+    return "Approve"
+}
+
+function ApproveTx(req) {
     // Approve transactions
-	var value = r.transaction.value;
-    var fromAddress = r.transaction.from;
-    var toAddress = r.transaction.to;
+	//var value = req.transaction.value;
+    //var fromAddress = req.transaction.from;
+    //var toAddress = req.transaction.to;
 	//Some rules could be applied to what is authorized
     //For now we approve anything
     return "Approve"

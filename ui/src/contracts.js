@@ -1,7 +1,13 @@
-
-const contracts = {
-    faucet : {
-        abi: [{"inputs": [], "stateMutability": "nonpayable", "type": "constructor"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "from", "type": "address"}, {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "Deposit", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "addr", "type": "address"}], "name": "OwnerAdded", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "addr", "type": "address"}], "name": "OwnerRemoved", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "internalType": "address", "name": "to", "type": "address"}], "name": "Withdrawal", "type": "event"}, {"inputs": [], "name": "addOwner", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [], "name": "destroy", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [], "name": "removeOwner", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"stateMutability": "payable", "type": "receive"}],
-        address: ""
-    }
+const Contracts = {
+    faucet: {}
 }
+const contractContext = require.context('./contracts', false, /\.json$/);
+const fileNames = contractContext.keys();
+(fileNames.map(contractContext)).forEach(contract => {
+    if (contract["name"] == "faucet.sol"){
+        Contracts.faucet["abi"] = contract["abi"]
+        Contracts.faucet["address"] = contract["address"]
+    }
+});
+
+export default Contracts

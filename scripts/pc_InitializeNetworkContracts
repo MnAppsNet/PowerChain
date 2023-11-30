@@ -1,7 +1,8 @@
+#!/usr/bin/python3
 import argparse, os, json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-from tools import deployContract
+from tools import deployContract, sendEth
 
 contracts = [
      "faucet",
@@ -27,13 +28,16 @@ try:
             exit(0)
     if ( not os.path.exists(args.path)):
          pass
-    w3 = Web3(Web3.IPCProvider(args.icp,timeout=15))
-    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-    w3.eth.default_account = w3.eth.accounts[0]
-    wei = w3.eth.get_balance(w3.eth.accounts[0])
-    pass
-
+    for contract in os.listdir(args.path):
+        if contract[-4:] != ".sol": continue #Not a contract
+        contractPath = os.path.join(args.path, contract)
+        if os.path.exists(contractPath+".json"): continue #Contract Already Deployed
+        if not os.path.isfile(contractPath): continue #Not a file
+        contractName = contract[:-4]
+        cotractAddress = deployContract(args.icp,contractPath)
+        if contractName == "faucet":
+                sendEth(args.icp,cotractAddress,100000000000000000000000000000000000000-500000000000000000000)
 
 except Exception as e:
     raise e

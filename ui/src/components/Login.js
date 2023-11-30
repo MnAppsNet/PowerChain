@@ -35,6 +35,7 @@ const Login = (props) =>
         window.ethereum.enable().then(function(accounts) {
             console.log('Connected to MetaMask');
             console.log('Account:', accounts[0]);
+            Tools.setAddress(accounts[0]);
         }).catch(function(error) {
             console.error('Error connecting to MetaMask:', error);
         });

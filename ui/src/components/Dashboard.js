@@ -1,32 +1,37 @@
 import React, { useState, useEffect } from "react"
 import Sidebar from "./Sidebar";
+import Home from "./Home";
+import styles from './../styles.css';
 import {
-  ChakraProvider
+  Flex,
+  Box,
+  Text
 } from '@chakra-ui/react'
-import styles from "./../styles.css";
-import Web3 from "web3"
+import contracts from "../contracts";
 
 const Dashboard = (props) => {
-
     const [connected, setConnected] = useState(false);
-
     const Tools = props.Tools
     const web3 = Tools.web3()
+    
     web3.eth.net.isListening()
     .then(() => {
         setConnected(true)
+        
     })
     .catch(_ => {
         Tools.showMessage(Tools.strings.failedToConnect)
         Tools.disconect()
     });
     return (
-        <ChakraProvider resetCSS>
+        <div>
             { connected ? (
-                <Sidebar></Sidebar>
+                <Sidebar>
+                    <Home Tools={Tools}></Home>
+                </Sidebar>
             )
             : (<h1>{Tools.strings.connecting}</h1>) }
-        </ChakraProvider>
+        </div>
     )
 }
 

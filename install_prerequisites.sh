@@ -16,7 +16,7 @@ else
 fi
 
 #Install Python
-sudo apt install python3 python3-dev
+sudo apt install python3 python3-dev python3-pip
 
 #Install Web3.py
 python -m pip install cython cytoolz web3 py-solc-x
