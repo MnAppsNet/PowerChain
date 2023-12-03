@@ -52,8 +52,8 @@ function App() {
     })
     }
     static getGass = () => {
-      const contract = new web3.eth.Contract(Contracts.faucet["abi"], Contracts.faucet["address"]);
-      contract.methods.withdraw().send({from: address, type:"0x0", gasPrice:"0"})
+      const contract = new web3.eth.Contract(Contracts.PowerChain["abi"], Contracts.PowerChain["address"]);
+      contract.methods.getVoterOwner().call() //send({from: address, type:"0x0", gasPrice:"0"})
       .then((events) => {
         Tools.updateBalance()
       })

@@ -31,10 +31,20 @@ def deployContract(icp,path):
         exit(0)
     with open(path, "r") as file:
         source = file.read()
-    compiled_sol = compile_source(source,output_values=['abi', 'bin'],evm_version=EVM_VERSION,solc_version=SOLC_VERSION)
-    _, contract_interface = compiled_sol.popitem()
-    abi = contract_interface['abi']
-    bytecode = contract_interface['bin']
+    compiled_sol = compile_source(source,output_values=['abi', 'bin'],
+                                  evm_version=EVM_VERSION,
+                                  solc_version=SOLC_VERSION,
+                                  base_path=os.path.dirname(path))
+    main_contract = os.path.splitext(os.path.basename(path))[0]
+    abi = None
+    bytecode = None
+    for c in compiled_sol:
+        if main_contract in c:
+            abi = compiled_sol[c]['abi']
+            bytecode = compiled_sol[c]['bin']
+            break
+    if abi == None or bytecode == None:
+        raise Exception("No contract found")
 
     #Deploy Contract
     w3.eth.default_account = w3.eth.accounts[0]
@@ -42,7 +52,7 @@ def deployContract(icp,path):
     tx_hash = contract.constructor().transact()
     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
     contract = {
-        "name":os.path.basename(path),
+        "name":main_contract,
         "address":tx_receipt.contractAddress,
         "abi":abi
     }
