@@ -20,13 +20,16 @@ function App() {
   const [Language, setLanguage] = useState("EN");
   const [MessageText, setMessageText] = useState("");
   const [MessageStatus, setMessageStatus] = useState("");
-  const [balance,setBalance] = useState(false);
+  const [balance,setBalance] = useState(0);
+  const [lockedBalance,setLockedBalance] = useState(0);
 
   class Tools {
     static strings = Languages.EN
     static balance = () => balance
+    static lockedBalance = () => lockedBalance
     static address = () => address
     static web3 = () => web3
+    static PowerChain = null;
     static showMessage = (text,error=true) => {
       setMessageStatus((error)?"error":"info")
       setMessageText(text)
@@ -40,22 +43,18 @@ function App() {
     }
     static setWeb3 = (w) => {
       w.eth.handleRevert = true;
+      Tools.PowerChain = new w.eth.Contract(Contracts.PowerChain["abi"], Contracts.PowerChain["address"])
       setWeb3(w);
     }
     static disconect = () => {
       setWeb3(null)
     }
     static updateBalance = () => {
-      web3.eth.getBalance(Tools.address()).then((balance) => {
-        console.log(balance)
-        setBalance(web3.utils.toWei(balance,"wei") + " wei")
-    })
-    }
-    static getGass = () => {
-      const contract = new web3.eth.Contract(Contracts.PowerChain["abi"], Contracts.PowerChain["address"]);
-      contract.methods.getVoterOwner().call() //send({from: address, type:"0x0", gasPrice:"0"})
-      .then((events) => {
-        Tools.updateBalance()
+      if (Tools.PowerChain == null) Tools.PowerChain = new web3.eth.Contract(Contracts.PowerChain["abi"], Contracts.PowerChain["address"]);
+      Tools.PowerChain.methods.balance(address).call() //send({from: address, type:"0x0", gasPrice:"0"})
+      .then((results) => {
+        setBalance(web3.utils.fromWei(results.available,"ether")); //Not really ether but ENT uses also 10^18 multiplier for decimals
+        setLockedBalance(web3.utils.fromWei(results.locked,"ether"));
       })
       .catch(function(error) {
         try{
@@ -63,6 +62,24 @@ function App() {
         }
         catch{}
       });
+    }
+    static transfer = (amnt) => {
+      if (balance < amnt){
+        Tools.showMessage(Tools.strings.unavailableBalance);
+        return;
+      }
+      Tools.PowerChain.methods.transfer(address).call()
+      .then((results) => {
+        setBalance(web3.utils.fromWei(results.available,"ether")); //Not really ether but ENT uses also 10^18 multiplier for decimals
+        setLockedBalance(web3.utils.fromWei(results.locked,"ether"));
+      })
+      .catch(function(error) {
+        try{
+          Tools.showMessage(error.receipt.events.Withdrawal.returnValues[0])
+        }
+        catch{}
+      });
+      // Transfer to be send to PowerChain contract
     }
   }
 

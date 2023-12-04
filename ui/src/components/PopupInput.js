@@ -1,24 +1,56 @@
-import React from 'react'
+import React, { useState } from "react"
 import {
     ChakraProvider,
     Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalCloseButton,
+    ModalBody,
+    Input,
+    FormControl,
+    FormLabel,
+    ModalFooter,
+    useDisclosure,
     Button,
+    Box
   } from '@chakra-ui/react'
+import { SlCheck,SlClose } from "react-icons/sl";
+
 import styles from "./../styles.css";
 
-const PopupInput = () => {
+const PopupInput = (props) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const states = {};
+    const inputItems = props.inputItems;
+    inputItems.map((link) => {
+        states[link.id] = link.default;
+    });
+    const [input,setInput] = useState(states)
+    const label = props.label;
+    const title = props.title;
+    const onClick = props.onClick;
   
     const initialRef = React.useRef(null)
     const finalRef = React.useRef(null)
-  
+    
+    const okButton = () => {
+        if (input != null){
+            onClick(input);
+        }
+        onClose();
+    }
+    const getInputValue = (id) => {
+        return input[id];
+    }
+    const setInputValue = (id,value) => {
+        const inpt = input;
+        inpt[id]=value;
+        setInput(inpt);
+    }
     return (
         <ChakraProvider resetCSS>
-            <Button onClick={onOpen}>Open Modal</Button>
-            <Button ml={4} ref={finalRef}>
-            I'll receive focus on close
-            </Button>
-    
+            <Button onClick={onOpen} borderWidth="0.1em" borderColor="black">{label}</Button>
             <Modal
             initialFocusRef={initialRef}
             finalFocusRef={finalRef}
@@ -27,25 +59,21 @@ const PopupInput = () => {
             >
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Create your account</ModalHeader>
+                <ModalHeader>{title}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                <FormControl>
-                    <FormLabel>First name</FormLabel>
-                    <Input ref={initialRef} placeholder='First name' />
-                </FormControl>
-    
-                <FormControl mt={4}>
-                    <FormLabel>Last name</FormLabel>
-                    <Input placeholder='Last name' />
-                </FormControl>
+                    <FormControl>
+                    {inputItems.map((link) => (
+                        <Box>
+                            <FormLabel>{link.text}</FormLabel>
+                            <Input value={getInputValue(link.id)} onChange={(e)=>setInputValue(link.id,e.target.value)} type={link.type} ref={initialRef} />
+                        </Box>
+                    ))}
+                    </FormControl>
                 </ModalBody>
-    
                 <ModalFooter>
-                <Button colorScheme='blue' mr={3}>
-                    Save
-                </Button>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={okButton} colorScheme='blue' mr={3}><SlCheck/></Button>
+                <Button onClick={onClose}><SlClose/></Button>
                 </ModalFooter>
             </ModalContent>
             </Modal>

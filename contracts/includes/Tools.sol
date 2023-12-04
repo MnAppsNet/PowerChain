@@ -28,7 +28,7 @@ contract Parameters {
     }
 }
 
-library Tools{
+contract Tools{
 
     event Error(string error);
 
@@ -37,7 +37,7 @@ library Tools{
         emit Error(message);
         revert(message);
     }
-
+    
     struct StorageUnitInfo{
         //Information about a storage unit
         bool state;

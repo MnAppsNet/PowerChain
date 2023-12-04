@@ -4,7 +4,12 @@
         "providerUrl":"Provider RPC URL",
         "invalidUrl":"Please provide a valid URL",
         "connecting":"Connecting...",
-        "failedToConnect":"Connection failed, make sure the RPC url is correct..."
+        "failedToConnect":"Connection failed, make sure the RPC url is correct...",
+        "unavailableBalance":"Not enough balance",
+        "transfer":"Transfer",
+        "amountForTransfer":"Amount to transfer",
+        "tokens":"Tokens",
+        "energy":"Energy"
     },
     "GR":{
         "connect":"Σύνδεση με MetaMask",

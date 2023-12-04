@@ -9,44 +9,43 @@ import "./includes/Energy.sol";
 
 contract PowerChain{
 
-    //PowerChain is handling fixed point ammounts with 18 decimals precision.
-    //All ammounts provided must be multiplied by 10^18
     event Info(string info);
-    Token internal _ENT; //Energy token
     Voters internal _Voters;
     Energy internal _energy;
     Parameters internal _parameters;
+    Tools internal _tools;
 
     constructor( ) {
+        _tools = new Tools();
         _parameters = new Parameters();
-        
         _Voters = new Voters(msg.sender);
         _energy = new Energy(_parameters);
     }
 
-    function getStorageUnits() external returns (address[] memory){
+    function getStorageUnits() external view returns (address[] memory){
         return _energy.getStorageUnits();
     }
 
-    function getStorageUnitEnergy() external returns (uint256){
-        
+    function getStorageUnitEnergy(address unit) external view returns (uint256){
+        //Returns storage unit energy in kWh
+        return _energy.getAvailableKwh(unit);
     }
 
     //Energy >>>>>>>
     function register(address unit, address owner) external{
         string memory voteString = 
-            Tools.concat( 
-                Tools.concat(
-                    Tools.concat("register_", unit) , "_" ) , owner);
+            _tools.concat( 
+                _tools.concat(
+                    _tools.concat("register_", unit) , "_" ) , owner);
         if (startVote(voteString)){
             _energy.registerUnit(unit,owner);
-            emit Info(Tools.concat("Storage unit registered >> ",unit));
+            emit Info(_tools.concat("Storage unit registered >> ",unit));
         }
     }
     function startConsumptionSession(address storageUnit,uint256 entAmmount) external {
         //Start a consumption session
         string memory consumptionSessionID = _energy.startConsumption(storageUnit, msg.sender, entAmmount);
-        emit Info(Tools.concat("Consumption session started >>", consumptionSessionID));
+        emit Info(_tools.concat("Consumption session started >>", consumptionSessionID));
     }
     function getConsumptionSessionEnergy(address addr) external returns(uint256){
         //Get the available energy of a consumption session
@@ -62,29 +61,32 @@ contract PowerChain{
     }
     //Token >>>>>>>
     function transfer( address to, uint256 amnt ) external{
-        _ENT.transfer(msg.sender, to, amnt);
+        _energy.transferEnergyTokens(msg.sender, to, amnt * 10**8);
+    }
+    function balance(address addr) external view returns(uint256 available, uint256 locked){
+        return _energy.energyTokenBalance(addr);
     }
 
     //Voting >>>>>>>
     function startVote(string memory voteString) internal returns(bool){
-        Tools.check(_Voters.isVoter(msg.sender),"Not authorized to execute this method");
+        _tools.check(_Voters.isVoter(msg.sender),"Not authorized to execute this method");
         int vote = _Voters.changeVote(msg.sender, voteString);
-        Tools.check(vote != -1,"Not authorized to execute this method");
+        _tools.check(vote != -1,"Not authorized to execute this method");
         emit Info((vote==1)?
-            Tools.concat(Tools.concat("You are in favor of: '",voteString),"'. Execute the method again to change your mind."):
-            Tools.concat(Tools.concat("You are against of: '",voteString),"'. Execute the method again to change your mind"));
+            _tools.concat(_tools.concat("You are in favor of: '",voteString),"'. Execute the method again to change your mind."):
+            _tools.concat(_tools.concat("You are against of: '",voteString),"'. Execute the method again to change your mind"));
         return _Voters.votePassed(voteString);
     }
     function addVoter(address addr) external{
-        if(startVote(Tools.concat("Add_Voter_", addr))){
+        if(startVote(_tools.concat("Add_Voter_", addr))){
             _Voters.add(addr);
-            emit Info(Tools.concat("New voter added >> ",addr));
+            emit Info(_tools.concat("New voter added >> ",addr));
         }
     }
     function removeVoter(address addr) external{
-        if(startVote(Tools.concat("Remove_Voter_", addr))){
+        if(startVote(_tools.concat("Remove_Voter_", addr))){
             _Voters.add(addr);
-            emit Info(Tools.concat("Voter removed >> ",addr));
+            emit Info(_tools.concat("Voter removed >> ",addr));
         }
     }
     

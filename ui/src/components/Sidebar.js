@@ -17,15 +17,13 @@ import {
   FlexProps,
 } from '@chakra-ui/react'
 import {
-  FiHome,
-  FiMenu,
+  FiMenu
 } from 'react-icons/fi'
 
-const LinkItems = [
-  { name: 'Home', icon: FiHome },
-]
+let LinkItems = []
 
-const Sidebar = ({ children }) => {
+const Sidebar = (props) => {
+  LinkItems = props.items;
   const { isOpen, onOpen, onClose } = useDisclosure()
   return (
     <ChakraProvider resetCSS>
@@ -45,7 +43,7 @@ const Sidebar = ({ children }) => {
         {/* mobilenav */}
         <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
         <Box ml={{ base: 0, md: 60 }} p="4">
-          { children }
+          { props.children }
         </Box>
       </Box>
     </ChakraProvider>
@@ -70,7 +68,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} onClick={link.action}>
           {link.name}
         </NavItem>
       ))}
