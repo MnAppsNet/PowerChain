@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
     ChakraProvider,
     Modal,
@@ -17,16 +17,21 @@ import {
   } from '@chakra-ui/react'
 import { SlCheck,SlClose } from "react-icons/sl";
 
-import styles from "./../styles.css";
+import styles from "../styles.js";
 
 const PopupInput = (props) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const states = {};
+    const [state,setState] = useState({})
     const inputItems = props.inputItems;
-    inputItems.map((link) => {
-        states[link.id] = link.default;
-    });
-    const [input,setInput] = useState(states)
+
+    useEffect(() => {
+        let st = {}
+        for (const [key, value] of Object.entries(inputItems)) {
+            st[key] = value.default;
+        }
+        setState(st);
+      }, []);
+
     const label = props.label;
     const title = props.title;
     const onClick = props.onClick;
@@ -35,22 +40,14 @@ const PopupInput = (props) => {
     const finalRef = React.useRef(null)
     
     const okButton = () => {
-        if (input != null){
-            onClick(input);
+        if (state != null){
+            onClick(...Object.values(state));
         }
         onClose();
     }
-    const getInputValue = (id) => {
-        return input[id];
-    }
-    const setInputValue = (id,value) => {
-        const inpt = input;
-        inpt[id]=value;
-        setInput(inpt);
-    }
     return (
         <ChakraProvider resetCSS>
-            <Button onClick={onOpen} borderWidth="0.1em" borderColor="black">{label}</Button>
+            <Button onClick={onOpen}  {...styles.button}>{label}</Button>
             <Modal
             initialFocusRef={initialRef}
             finalFocusRef={finalRef}
@@ -64,9 +61,14 @@ const PopupInput = (props) => {
                 <ModalBody pb={6}>
                     <FormControl>
                     {inputItems.map((link) => (
-                        <Box>
+                        <Box key={link.id}>
                             <FormLabel>{link.text}</FormLabel>
-                            <Input value={getInputValue(link.id)} onChange={(e)=>setInputValue(link.id,e.target.value)} type={link.type} ref={initialRef} />
+                            <Input 
+                                id={link.id} 
+                                value={(link.id in state)?state[link.id]:link.default}
+                                onChange={e => {if (link.id in state){ setState(Object.assign({}, state, { [link.id]: e.target.value }))} else {setState(Object.assign({}, state,{ [link.id]: link.default}))} }}
+                                type={link.type} 
+                                ref={initialRef} />
                         </Box>
                     ))}
                     </FormControl>

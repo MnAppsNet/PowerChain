@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react"
 import Sidebar from "./Sidebar";
-import Tokens from "./Tokens";
-import styles from './../styles.css';
+import Tokens from "./pages/Tokens.js";
+import Energy from "./pages/Energy.js";
+import styles from '../styles.js';
 import {
   Flex,
   Box,
@@ -12,15 +13,21 @@ import {
     FiHome,
     FiWind
   } from 'react-icons/fi'
-import contracts from "../contracts";
 
 const Dashboard = (props) => {
+
+    class Sections{
+        static Tokens = 1;
+        static Energy = 2;
+    }
+
     const [connected, setConnected] = useState(false);
+    const [section,setSection] = useState(Sections.Tokens)
     const Tools = props.Tools
     const web3 = Tools.web3()
     const menuItems = [
-        { name: Tools.strings.tokens, icon: FiHome, action:()=>{alert("Tokens")} },
-        { name: Tools.strings.energy, icon: FiWind, action:()=>{alert("Energy")} }
+        { name: Tools.strings.tokens, icon: FiHome, action:()=>{ Tools.updateBalance(); setSection(Sections.Tokens)} },
+        { name: Tools.strings.energy, icon: FiWind, action:()=>{ Tools.updateTotalEnergy(); setSection(Sections.Energy)} }
     ]
     web3.eth.net.isListening()
     .then(() => {
@@ -35,7 +42,12 @@ const Dashboard = (props) => {
         <div>
             { connected ? (
                 <Sidebar items={menuItems}>
-                    <Tokens Tools={Tools}></Tokens>
+                    {section === Sections.Tokens && (
+                        <Tokens Tools={Tools}/>
+                    )}
+                    {section === Sections.Energy && (
+                        <Energy  Tools={Tools}/>
+                    )}
                 </Sidebar>
             )
             : (<h1>{Tools.strings.connecting}</h1>) }

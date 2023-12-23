@@ -9,7 +9,16 @@
         "transfer":"Transfer",
         "amountForTransfer":"Amount to transfer",
         "tokens":"Tokens",
-        "energy":"Energy"
+        "energy":"Energy",
+        "available":"Available",
+        "locked":"Locked",
+        "refresh":"Refresh",
+        "invalidAddress":"The given address is invalid",
+        "eEURHeader":"eEuro Tokens",
+        "ENTHeader":"ENT Tokens",
+        "accountAddress":"Account Address",
+        "amount":"Amount",
+        "totalEnergyHeader":"Total Energy"
     },
     "GR":{
         "connect":"Σύνδεση με MetaMask",

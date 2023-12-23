@@ -8,7 +8,7 @@ import {
   Button
 } from '@chakra-ui/react'
 import Web3 from 'web3';
-import styles from "./../styles.css";
+import styles from '../styles.js';
 
 const Login = (props) => 
 {
@@ -30,7 +30,7 @@ const Login = (props) =>
 
     //Connect with MetaMask:
       if (window.ethereum) {
-        Tools.setWeb3(new Web3(window.ethereum));
+        Tools.setweb3(new Web3(window.ethereum));
         // Request account access if needed
         window.ethereum.enable().then(function(accounts) {
             console.log('Connected to MetaMask');
@@ -57,9 +57,7 @@ const Login = (props) =>
       >
         <Image height="100px" width="100px" src="logo192.png" />
         <Text 
-          color="gray.500"
-          fontSize="3xl"
-          fontWeight="bold">PowerChain</Text>
+          style={styles.logoText}>PowerChain</Text>
         {/* Ask for HTTP RPC URL
         <Input
           className={styles.input}
@@ -72,11 +70,7 @@ const Login = (props) =>
           onChange={handleInputRPCUrl}
         /> */}
         <Button
-          className={styles.button}
-          variant="solid" 
-          size="md" 
-          colorScheme="telegram"
-          onClick={handleConnectButtonClick}>
+          onClick={handleConnectButtonClick} {...styles.button}>
           {strings.connect}
         </Button>
       </Flex>

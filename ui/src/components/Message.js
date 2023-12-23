@@ -5,7 +5,7 @@ import {
     Alert,
     AlertIcon,
   } from '@chakra-ui/react'
-import styles from "./../styles.css";
+import styles from "../styles.js";
 
 const Message = (props) =>
 {
@@ -14,7 +14,7 @@ const Message = (props) =>
     const status = props.status
     return (
         <ChakraProvider resetCSS>
-            <Alert className={styles.alert} status={status} onClick={Tools.clearMessage}>
+            <Alert styles={styles.alert} status={status} onClick={Tools.clearMessage}>
                 <AlertIcon />{text}
             </Alert>
         </ChakraProvider>

@@ -2,41 +2,9 @@
 // Author: Emmanouil Kalyvas
 pragma solidity ^0.8.0;
 
-contract Parameters {
-    uint256 public M; //Minimum minting rate
-    uint256 public B; //Maximum burning rate
-    uint256 public C; //Missing energy cover rate
-    uint256 public H; //Hours to keep consumsion session active
-    constructor(){
-        //Default values
-        M = 0.01 * 10**8;
-        B = 3 * 10**8;
-        C = 0.1 * 10**8;
-        H = 2 hours;
-    }
-    function setM(uint256 m) public {
-        M = m;
-    }
-    function setB(uint256 b) public {
-        B = b;
-    }
-    function setC(uint256 c) public {
-        C = c;
-    }
-    function setH(uint256 h) public{
-        H = h * 3600;
-    }
-}
-
 contract Tools{
 
-    event Error(string error);
-
-    function check(bool condition, string memory message) public{
-        if (condition) return; //If condition is met, don't revert
-        emit Error(message);
-        revert(message);
-    }
+    uint256 public constant multiplier = 10**18; //Used to handle fixed point numbers
     
     struct StorageUnitInfo{
         //Information about a storage unit
@@ -46,10 +14,12 @@ contract Tools{
     }
     struct ConsumptionSession{
         //Parameters of a consumsion session
+        bool state;
         uint256 kwh;  //Available kwh to consume
         uint256 rate; //Burn rate
         uint256 timestamp;
         address consumer;
+        address unit;
     }
 
     function toAsciiString(address x) public pure returns (string memory) {
