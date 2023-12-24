@@ -1,6 +1,6 @@
 import { color } from "framer-motion";
 
-export const colors = {
+export const Colors = {
   text: "#161A30",
   textDisabled: "#B6BBC4",
   lines: "#161A30",
@@ -11,32 +11,32 @@ export const colors = {
   white: "#EEF5FF"
 };
 
-export const styles = {
+export const Styles = {
   main : {
     margin: 0,
   fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
   },
   input : {
-    borderColor:colors.lines,
+    borderColor:Colors.lines,
     borderRadius: 20
   },
   panel: {
     width: '100%',
     borderWidth: '2px',
-    backgroundColor: colors.enabled,
-    borderColor: colors.lines,
-    color: colors.text,
+    backgroundColor: Colors.enabled,
+    borderColor: Colors.lines,
+    color: Colors.text,
     borderWidth:"0.2em",
     padding:"1em"
   },
   seperator: {
-    backgroundColor: colors.disabled,
-    color: colors.disabled,
-    borderColor: colors.disabled,
+    backgroundColor: Colors.disabled,
+    color: Colors.disabled,
+    borderColor: Colors.disabled,
     borderWidth: "0.1em"
   },
   logoText: {
-    color:colors.text,
+    color:Colors.text,
     fontSize:"2em",
     fontWeight:"bold"
   },
@@ -69,4 +69,4 @@ export const styles = {
   }
 }
 
-export default styles;
+export default Styles;

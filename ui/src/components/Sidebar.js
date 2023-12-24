@@ -17,16 +17,17 @@ import {
 import {
   FiMenu
 } from 'react-icons/fi'
-import {colors, styles} from '../styles.js';
 
 let LinkItems = []
+let controller = null;
 
 const Sidebar = (props) => {
+  controller = props.controller;
   LinkItems = props.items;
   const { isOpen, onOpen, onClose } = useDisclosure()
   return (
     <ChakraProvider resetCSS>
-      <Box minH="100vh" bg={colors.background}>
+      <Box minH="100vh" bg={controller.colors.background}>
         <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
         <Drawer
           isOpen={isOpen}
@@ -52,9 +53,9 @@ const Sidebar = (props) => {
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
     <Box
-      bg={colors.white}
+      bg={controller.colors.white}
       borderRight="1px"
-      borderRightColor={colors.lines}
+      borderRightColor={controller.colors.lines}
       w={{ base: 'full', md: 60 }}
       pos="fixed"
       h="full"
@@ -90,8 +91,8 @@ const NavItem = ({ icon, children, ...rest }) => {
         role="group"
         cursor="pointer"
         _hover={{
-          bg: colors.enabled,
-          color: colors.text,
+          bg: controller.colors.enabled,
+          color: controller.colors.text,
         }}
         {...rest}>
         {icon && (
@@ -99,7 +100,7 @@ const NavItem = ({ icon, children, ...rest }) => {
             mr="4"
             fontSize="16"
             _groupHover={{
-              color: colors.text,
+              color: controller.colors.text,
             }}
             as={icon}
           />
@@ -117,9 +118,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
       px={{ base: 4, md: 24 }}
       height="20"
       alignItems="center"
-      bg={colors.white}
+      bg={controller.colors.white}
       borderBottomWidth="1px"
-      borderBottomColor={colors.lines}
+      borderBottomColor={controller.colors.lines}
       justifyContent="flex-start"
       {...rest}>
       <IconButton

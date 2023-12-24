@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react"
 import Sidebar from "./Sidebar";
 import Tokens from "./pages/Tokens.js";
 import Energy from "./pages/Energy.js";
-import styles from '../styles.js';
 import {
   Flex,
   Box,
@@ -23,36 +22,27 @@ const Dashboard = (props) => {
 
     const [connected, setConnected] = useState(false);
     const [section,setSection] = useState(Sections.Tokens)
-    const Tools = props.Tools
-    const web3 = Tools.web3()
+    const controller = props.controller
+    const web3 = controller.web3
     const menuItems = [
-        { name: Tools.strings.tokens, icon: FiHome, action:()=>{ Tools.updateBalance(); setSection(Sections.Tokens)} },
-        { name: Tools.strings.energy, icon: FiWind, action:()=>{ Tools.updateTotalEnergy(); setSection(Sections.Energy)} }
+        { name: controller.strings.tokens, icon: FiHome, action:()=>{ controller.updateBalance(); setSection(Sections.Tokens)} },
+        { name: controller.strings.energy, icon: FiWind, action:()=>{ controller.updateTotalEnergy(); setSection(Sections.Energy)} }
     ]
-    web3.eth.net.isListening()
-    .then(() => {
-        setConnected(true)
-        
-    })
-    .catch(_ => {
-        Tools.showMessage(Tools.strings.failedToConnect)
-        Tools.disconect()
-    });
     return (
         <div>
-            { connected ? (
-                <Sidebar items={menuItems}>
+            { controller.connected ? (
+                <Sidebar items={menuItems} controller={controller}>
                     {section === Sections.Tokens && (
-                        <Tokens Tools={Tools}/>
+                        <Tokens controller={controller}/>
                     )}
                     {section === Sections.Energy && (
-                        <Energy  Tools={Tools}/>
+                        <Energy controller={controller}/>
                     )}
                 </Sidebar>
             )
-            : (<h1>{Tools.strings.connecting}</h1>) }
+            : (<h1>{controller.strings.connecting}</h1>) }
         </div>
     )
 }
 
-export default Dashboard
+export default Dashboard;

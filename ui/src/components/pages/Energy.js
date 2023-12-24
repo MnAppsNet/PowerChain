@@ -5,34 +5,32 @@ import {
     Text,
     Button
 } from '@chakra-ui/react'
-import styles from "../../styles.js";
 import PanelList from "../PanelList.js";
 
 const Energy = (props) => {
-    const Tools = props.Tools
-    const web3 = Tools.web3()
+    const controller = props.controller
 
     const panels = [
         //ENT Tokens Panel >>>>>
         {
-            header: Tools.strings.totalEnergyHeader,
+            header: controller.strings.totalEnergyHeader,
             info: [{
-                label: Tools.strings.available,
-                value: (Tools.totalEnergy() + " kWh")
+                label: controller.strings.available,
+                value: (controller.totalEnergy + " kWh")
             }],
             buttons: [
                 {
                     button: {
-                        onClick: Tools.updateTotalEnergy
+                        onClick: (...args) => controller.updateTotalEnergy(...args)
                     },
-                    text: Tools.strings.refresh
+                    text: controller.strings.refresh
                 }
             ]
         }
     ]
 
     return (
-        <PanelList panels={panels}/>
+        <PanelList panels={panels} controller={controller}/>
     )
 }
 

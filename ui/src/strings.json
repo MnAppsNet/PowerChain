@@ -18,7 +18,8 @@
         "ENTHeader":"ENT Tokens",
         "accountAddress":"Account Address",
         "amount":"Amount",
-        "totalEnergyHeader":"Total Energy"
+        "totalEnergyHeader":"Total Energy",
+        "failedToInitializeContract":"Failed to initialize PowerChain contract. Make sure it is deployed on the blockchain."
     },
     "GR":{
         "connect":"Σύνδεση με MetaMask",

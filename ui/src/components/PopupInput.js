@@ -17,11 +17,10 @@ import {
   } from '@chakra-ui/react'
 import { SlCheck,SlClose } from "react-icons/sl";
 
-import styles from "../styles.js";
-
 const PopupInput = (props) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [state,setState] = useState({})
+    const controller = props.controller;
     const inputItems = props.inputItems;
 
     useEffect(() => {
@@ -47,7 +46,7 @@ const PopupInput = (props) => {
     }
     return (
         <ChakraProvider resetCSS>
-            <Button onClick={onOpen}  {...styles.button}>{label}</Button>
+            <Button onClick={onOpen}  {...controller.styles.button}>{label}</Button>
             <Modal
             initialFocusRef={initialRef}
             finalFocusRef={finalRef}

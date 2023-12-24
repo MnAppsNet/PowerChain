@@ -7,29 +7,27 @@ import {
 } from '@chakra-ui/react'
 import { SlRefresh } from "react-icons/sl";
 import PopupInput from "../PopupInput.js"
-import styles from "../../styles.js";
 import PanelList from "../PanelList.js";
 
 const Tokens = (props) => {
-    const Tools = props.Tools
-    const web3 = Tools.web3()
+    const controller = props.controller;
 
     const panels = [
         //ENT Tokens Panel >>>>>
         {
-            header: Tools.strings.ENTHeader,
+            header: controller.strings.ENTHeader,
             info: [{
-                label: Tools.strings.available,
-                value: (Tools.balanceENT() + " ENT")
+                label: controller.strings.available,
+                value: (controller.balanceENT + " ENT")
             }, {
-                label: Tools.strings.locked,
-                value: (Tools.lockedBalanceENT() + " ENT")
+                label: controller.strings.locked,
+                value: (controller.lockedBalanceENT + " ENT")
             }],
             buttons: [
                 {
                     popup: {
                         type: "number",
-                        title: Tools.strings.transfer,
+                        title: controller.strings.transfer,
                         label: "Transfer",
                         inputItems: [{
                             id: "account",
@@ -42,57 +40,57 @@ const Tokens = (props) => {
                             type: "number",
                             default: 0
                         }],
-                        onClick: Tools.transferENT
+                        onClick: (...args) => controller.transferENT(...args)
                     }
                 }, {
                     button: {
-                        onClick: Tools.updateBalance
+                        onClick: (...args) => controller.updateBalance(...args)
                     },
-                    text: Tools.strings.refresh
+                    text: controller.strings.refresh
                 }
             ]
         },
         //EUR Tokens Panel >>>>>
         {
-            header: Tools.strings.eEURHeader,
+            header: controller.strings.eEURHeader,
             info: [{
-                label: Tools.strings.available,
-                value: (Tools.balanceEUR() + " EUR")
+                label: controller.strings.available,
+                value: (controller.balanceEUR + " EUR")
             }, {
-                label: Tools.strings.locked,
-                value: (Tools.lockedBalanceEUR() + " EUR")
+                label: controller.strings.locked,
+                value: (controller.lockedBalanceEUR + " EUR")
             }],
             buttons: [
                 {
                     popup: {
                         type: "number",
-                        title: Tools.strings.transfer,
+                        title: controller.strings.transfer,
                         label: "Transfer",
                         inputItems: [{
                             id: "account",
-                            text: Tools.strings.accountAddress,
+                            text: controller.strings.accountAddress,
                             type: "text",
                             default: ""
                         }, {
                             id: "amount",
-                            text: Tools.strings.amount,
+                            text: controller.strings.amount,
                             type: "number",
                             default: 0
                         }],
-                        onClick: Tools.transferEUR
+                        onClick: (...args) => controller.transferEUR(...args)
                     }
                 }, {
                     button: {
-                        onClick: Tools.updateBalance
+                        onClick: (...args) => controller.updateBalance(...args)
                     },
-                    text: Tools.strings.refresh
+                    text: controller.strings.refresh
                 }
             ]
         }
     ]
 
     return (
-        <PanelList panels={panels}/>
+        <PanelList panels={panels} controller={controller}/>
     )
 }
 

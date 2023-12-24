@@ -8,12 +8,10 @@ import {
   Button
 } from '@chakra-ui/react'
 import Web3 from 'web3';
-import styles from '../styles.js';
 
 const Login = (props) => 
 {
-  const Tools = props.Tools
-  const strings = Tools.strings
+  const controller = props.controller;
 
   //const [RPCUrl, setRPCUrl] = useState('');
   //const handleInputRPCUrl = (event) => {
@@ -22,20 +20,20 @@ const Login = (props) =>
   const handleConnectButtonClick = () => {
     //Connect with HTTP RPC Url:
     //if (RPCUrl.startsWith("http://") || RPCUrl.startsWith("https://")){
-    //  Tools.setRpcUrl(RPCUrl)
+    //  controller.setRpcUrl(RPCUrl)
     //}
     //else{
-    //  Tools.showMessage(strings.invalidUrl)
+    //  controller.showMessage(strings.invalidUrl)
     //}
 
     //Connect with MetaMask:
       if (window.ethereum) {
-        Tools.setweb3(new Web3(window.ethereum));
+        controller.web3 = new Web3(window.ethereum);
         // Request account access if needed
         window.ethereum.enable().then(function(accounts) {
             console.log('Connected to MetaMask');
             console.log('Account:', accounts[0]);
-            Tools.setAddress(accounts[0]);
+            controller.address = accounts[0];
         }).catch(function(error) {
             console.error('Error connecting to MetaMask:', error);
         });
@@ -57,7 +55,7 @@ const Login = (props) =>
       >
         <Image height="100px" width="100px" src="logo192.png" />
         <Text 
-          style={styles.logoText}>PowerChain</Text>
+          style={controller.styles.logoText}>PowerChain</Text>
         {/* Ask for HTTP RPC URL
         <Input
           className={styles.input}
@@ -70,8 +68,8 @@ const Login = (props) =>
           onChange={handleInputRPCUrl}
         /> */}
         <Button
-          onClick={handleConnectButtonClick} {...styles.button}>
-          {strings.connect}
+          onClick={handleConnectButtonClick} {...controller.styles.button}>
+          {controller.strings.connect}
         </Button>
       </Flex>
     </ChakraProvider>
