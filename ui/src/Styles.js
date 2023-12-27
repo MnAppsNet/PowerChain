@@ -52,9 +52,30 @@ export const Styles = {
   button: {
     size:"md",
     variant:"solid",
-    size:"md",
+    inlineSize:"100%",
+    overflowWrap: "break-word",
+    fontSize:"0.9em",
     borderWidth:"0.1em",
     borderColor:"black"
+  },
+  buttonLogin: {
+    size:"md",
+    variant:"solid",
+    fontSize:"1em",
+    borderWidth:"0.1em",
+    borderColor:"black"
+  },
+  itemList:{
+    display:"flex",
+    flexWrap:"wrap",
+    alignItems:"center",
+    gap:"0.3em"
+  },
+  item:{
+    display:"flex",
+    flexDirection:"column",
+    width:"33%",
+    flex:"1 0 33%"
   },
   alert : {
     position: 'fixed',

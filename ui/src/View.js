@@ -8,7 +8,7 @@ import {
   Box,
   Text
 } from '@chakra-ui/react'
-import {Styles,Colors} from './Styles.js'
+import { Styles, Colors } from './Styles.js'
 import Web3 from "web3";
 import Controller from "./Controller.js";
 import Languages from "./strings.json"
@@ -16,7 +16,7 @@ import React from "react";
 
 class View extends React.Component {
 
-  constructor(){
+  constructor() {
     super();
     this.state = {
       styles: Styles,
@@ -28,18 +28,37 @@ class View extends React.Component {
       connected: false,
       messageText: "",
       messageStatus: "",
-      balance: {ENT:0,EUR:0},
-      lockedBalance: {ENT:0,EUR:0},
-      totalEnergy: 0
+      balance: { ENT: 0, EUR: 0 },
+      lockedBalance: { ENT: 0, EUR: 0 },
+      totalEnergy: 0,
+      voter: false,
+      votes: [],
+      sessions: [],
+      storageUnitInfo: [],
     };
     this.state.strings = Languages["EN"];
     this.controller = new Controller(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.web3 !== this.state.web3){
-      if (this.state.web3 != null)
-        this.controller.connect();
+    if (prevState.web3 !== this.state.web3) {
+      if (this.state.web3 != null) {
+        // Request account access if needed
+        const controller = this.controller;
+        window.ethereum.enable().then(function (accounts) {
+          console.log('Connected to MetaMask');
+          console.log('Account:', accounts[0]);
+          controller.connect(accounts[0]);
+        }).catch(function (error) {
+          console.error('Error connecting to MetaMask:', error);
+        });
+      }
+    }
+    if (prevState.address !== this.state.address) {
+      if (this.state.address != "") {
+        this.controller.isVoter();
+        this.controller.getBalance();
+      }
     }
   }
 

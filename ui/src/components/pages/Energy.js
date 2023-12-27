@@ -11,7 +11,7 @@ const Energy = (props) => {
     const controller = props.controller
 
     const panels = [
-        //ENT Tokens Panel >>>>>
+        //Total Energy Panel >>>>>
         {
             header: controller.strings.totalEnergyHeader,
             info: [{
@@ -21,7 +21,33 @@ const Energy = (props) => {
             buttons: [
                 {
                     button: {
-                        onClick: (...args) => controller.updateTotalEnergy(...args)
+                        onClick: (...args) => controller.getTotalEnergy(...args)
+                    },
+                    text: controller.strings.refresh
+                }
+            ]
+        },
+        //User Consumption Sessions Panel >>>>>
+        {
+            header: controller.strings.consumptionSessions,
+            info: controller.sessions,
+            buttons: [
+                {
+                    button: {
+                        onClick: (...args) => controller.getConsumptionSessions(...args)
+                    },
+                    text: controller.strings.refresh
+                }
+            ]
+        },
+        //Storage Units >>>>>
+        {
+            header: controller.strings.storageUnits,
+            info: controller.storageUnitInfo,
+            buttons: [
+                {
+                    button: {
+                        onClick: (...args) => controller.getStorageUnitsInfo(...args)
                     },
                     text: controller.strings.refresh
                 }

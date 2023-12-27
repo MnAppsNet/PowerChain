@@ -23,14 +23,6 @@ const PopupInput = (props) => {
     const controller = props.controller;
     const inputItems = props.inputItems;
 
-    useEffect(() => {
-        let st = {}
-        for (const [key, value] of Object.entries(inputItems)) {
-            st[key] = value.default;
-        }
-        setState(st);
-      }, []);
-
     const label = props.label;
     const title = props.title;
     const onClick = props.onClick;
@@ -39,7 +31,14 @@ const PopupInput = (props) => {
     const finalRef = React.useRef(null)
     
     const okButton = () => {
-        if (state != null){
+        if (Object.keys(state).length === 0){
+            let st = {}
+            for (const [_, value] of Object.entries(inputItems)) {
+                st[value.id] = value.default;
+            }
+            onClick(...Object.values(st));
+            setState(st);
+        }else{
             onClick(...Object.values(state));
         }
         onClose();

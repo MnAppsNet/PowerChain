@@ -57,6 +57,10 @@ contract PowerChain {
     }
 
     function registerStorageUnit(address unit, address owner) external {
+        if (_energy.getStorageUnitState(unit)) {
+            emit Error("Storage unit is already active...");
+            return;
+        }
         string memory voteString = _tools.concat(
             _tools.concat(_tools.concat("register_", unit), "_"),
             owner
@@ -103,6 +107,13 @@ contract PowerChain {
             emit Error(reason);
         }
     }
+    function getUserConsumptionSessions(address addr) external view returns (Energy.UserConsumptionSession[] memory userSessions){
+        return _energy.getUserConsumptionSessions(addr);
+    }
+
+    function getStorageUnitsInfo() external view returns (Energy.StorageUnitInfo[] memory){
+        return _energy.getStorageUnitsInfo();
+    }
 
     function getConsumptionSessionEnergy(
         address addr
@@ -127,7 +138,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function energyProduced(address producer, uint256 kwh) external {
         if (!_energy.getStorageUnitState(msg.sender)) {
             emit Error("Method can be called only by active storage units");
@@ -260,17 +270,35 @@ contract PowerChain {
 
     //-------------------------------------------------------------------------------
     //Voting >>>>>>>
-    function isVoter() external view returns (bool) {
+    function isVoter() external view returns (bool voter) {
         return _Voters.isVoter(msg.sender);
     }
-
-    function startVote(string memory voteString) internal returns (bool) {
+    function getVotes() external returns (Voters.UserInfo[] memory voterVotes){
+        try _Voters.getVotes(msg.sender) returns(Voters.UserInfo[] memory votes){
+            return votes;
+        } catch Error(string memory reason) {
+            emit Error(reason);
+        }
+    }
+    function startVote(string memory voteString) internal returns (bool votePassed) {
         if (!_Voters.isVoter(msg.sender)) {
             emit Error("Not authorized to execute this method");
             return false;
         }
+        //Avoid using vote strings that has been already passed in the past
+        bool passed = _Voters.isVotePassed(voteString);
+        string memory availableVoteString = voteString;
+        uint256 i = 1;
+        while (passed){
+            availableVoteString = 
+                _tools.concat(voteString, 
+                    _tools.concat("_",
+                        _tools.uint2str(i)));
+            passed = _Voters.isVotePassed(availableVoteString);
+            i += 1;
+        }
         int vote = 0;
-        try _Voters.changeVote(msg.sender, voteString) returns (int v) {
+        try _Voters.changeVote(msg.sender, availableVoteString) returns (int v) {
             vote = v;
         } catch Error(string memory reason) {
             emit Error(reason);
@@ -279,16 +307,16 @@ contract PowerChain {
         emit Info(
             (vote == 1)
                 ? _tools.concat(
-                    _tools.concat("You are in favor of: '", voteString),
+                    _tools.concat("You are in favor of: '", availableVoteString),
                     "'. Execute the method again to change your mind."
                 )
                 : _tools.concat(
-                    _tools.concat("You are against of: '", voteString),
+                    _tools.concat("You are against of: '", availableVoteString),
                     "'. Execute the method again to change your mind"
                 )
         );
-        try _Voters.votePassed(voteString) returns (bool passed) {
-            return passed;
+        try _Voters.isVotePassed(availableVoteString) returns (bool passedVote) {
+            return passedVote;
         } catch Error(string memory reason) {
             emit Error(reason);
             return false;
@@ -296,6 +324,10 @@ contract PowerChain {
     }
 
     function addVoter(address addr) external {
+        if (_Voters.isVoter(addr)) {
+            emit Error("User is already a voter...");
+            return;
+        }
         if (startVote(_tools.concat("Add_Voter_", addr))) {
             try _Voters.add(addr) {
                 emit Info(_tools.concat("New voter added >> ", addr));
@@ -306,6 +338,10 @@ contract PowerChain {
     }
 
     function removeVoter(address addr) external {
+        if (!_Voters.isVoter(addr)) {
+            emit Error("User is not a voter...");
+            return;
+        }
         if (startVote(_tools.concat("Remove_Voter_", addr))) {
             try _Voters.remove(addr) {
                 emit Info(_tools.concat("Voter removed >> ", addr));

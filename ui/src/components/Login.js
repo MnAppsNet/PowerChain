@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import {
   ChakraProvider,
   Input,
@@ -9,9 +9,24 @@ import {
 } from '@chakra-ui/react'
 import Web3 from 'web3';
 
-const Login = (props) => 
-{
+const Login = (props) => {
   const controller = props.controller;
+
+  useEffect(() => {
+    if (localStorage.getItem("connected", "") != "") {
+      controller.web3 = new Web3(window.ethereum);
+    }
+    window.ethereum.on("accountsChanged", (e) => {
+      if (e.length == 0) {
+        localStorage.setItem("connected", "");
+        controller.web3 = null;
+        controller.connected = false;
+      } else {
+        localStorage.setItem("connected", e[0]);
+      }
+    });
+  }, [])
+
 
   //const [RPCUrl, setRPCUrl] = useState('');
   //const handleInputRPCUrl = (event) => {
@@ -27,18 +42,10 @@ const Login = (props) =>
     //}
 
     //Connect with MetaMask:
-      if (window.ethereum) {
-        controller.web3 = new Web3(window.ethereum);
-        // Request account access if needed
-        window.ethereum.enable().then(function(accounts) {
-            console.log('Connected to MetaMask');
-            console.log('Account:', accounts[0]);
-            controller.address = accounts[0];
-        }).catch(function(error) {
-            console.error('Error connecting to MetaMask:', error);
-        });
+    if (window.ethereum) {
+      controller.web3 = new Web3(window.ethereum);
     } else {
-        console.error('MetaMask not detected! Please install MetaMask.');
+      console.error('MetaMask not detected! Please install MetaMask.');
     }
   }
   return (
@@ -54,7 +61,7 @@ const Login = (props) =>
         mt={4}
       >
         <Image height="100px" width="100px" src="logo192.png" />
-        <Text 
+        <Text
           style={controller.styles.logoText}>PowerChain</Text>
         {/* Ask for HTTP RPC URL
         <Input
@@ -68,7 +75,7 @@ const Login = (props) =>
           onChange={handleInputRPCUrl}
         /> */}
         <Button
-          onClick={handleConnectButtonClick} {...controller.styles.button}>
+          onClick={handleConnectButtonClick} {...controller.styles.buttonLogin}>
           {controller.strings.connect}
         </Button>
       </Flex>

@@ -14,19 +14,30 @@ const Panel = (props) => {
     const buttons = props.buttons;
     let j = 0;
     return (
-            <Box style={controller.styles.panel}>
-                <Text {...controller.styles.headerText} >{header}</Text>
-                <hr style={controller.styles.seperator} />
-                {info.map((i) => (
-                    <Text key={header+" "+i.label} {...controller.styles.text}>{i.label}: {i.value} </Text>
-                ))}
-                <Box display="flex" alignItems="center" gap="0.3em">
+            <Box key={header+" "+(++j).toString()+" box"} style={controller.styles.panel}>
+                <Text key={header+" "+(++j).toString()+" header"} {...controller.styles.headerText} >{header}</Text>
+                <hr key={header+" "+(++j).toString()+" separator"} style={controller.styles.seperator} />
+                {info && info.length > 0 && (
+                    <>
+                    {info.map((i) => (
+                        <>
+                            {i.value && (
+                            <Text key={header+" "+(++j).toString()+" "+i.label} {...controller.styles.text}>{i.label}: {i.value} </Text>
+                            )}
+                            {!i.value && (
+                            <Text key={header+" "+(++j).toString()+" "+i.label} {...controller.styles.text}>{i.label}</Text>
+                            )}
+                        </>
+                    ))}
+                    </>
+                )}
+                <Box {...controller.styles.itemList}>
                 {buttons.map((b) => {
                     j += 1;
                     if ('popup' in b){
-                        return (<PopupInput controller={controller} key={header+" "+j.toString()} {...b.popup}/>)
+                        return (<Box key={header+" "+(++j).toString()}  {...controller.styles.item}><PopupInput key={header+" b "+j.toString()}  controller={controller} {...b.popup}/></Box>)
                     }else if ('button' in b){
-                        return (<Button key={header+" "+j.toString()} {...Object.assign({}, b.button, controller.styles.button)}>{b.text}</Button>)
+                        return (<Box key={header+" "+(++j).toString()} {...controller.styles.item}><Button key={header+" b "+j.toString()} {...Object.assign({}, b.button, controller.styles.button)}>{b.text}</Button></Box>)
                     }
                 })}
                 </Box>

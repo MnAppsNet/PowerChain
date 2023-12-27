@@ -11,17 +11,41 @@ contract Energy{
     Parameters internal _parameters;
     Tools internal _tools;
 
+    struct KWH {
+        uint256 available;
+        uint256 locked;
+    }
+    struct StorageUnitInfo {
+        //Information about a storage unit
+        bool state;
+        address owner;
+        uint256 kwh;
+    }
+    struct ConsumptionSession {
+        //Parameters of a consumsion session
+        bool state;
+        uint256 kwh; //Available kwh to consume
+        uint256 rate; //Burn rate
+        uint256 timestamp;
+        address consumer;
+        address unit;
+    }
+    struct UserConsumptionSession {
+        string sessionId;
+        uint256 kwh;
+        uint256 timestamp;
+        address unit;
+    }
+
     address private _owner;
     uint256 private _totalKwh;
     uint256 internal _storageUnitsNumber;
     address[] internal _storageUnitAddresses;
     string[] internal _consumptionSessions;
-    struct KWH {
-        uint256 available;
-        uint256 locked;
-    }
-    mapping(address => Tools.StorageUnitInfo) internal _storageUnits;
-    mapping(string => Tools.ConsumptionSession) internal _activeSessions;
+    mapping(address => string[]) internal _userConsumptionSessions;
+    mapping(address => mapping(string => bool)) internal _userConsumptionSessionExists;
+    mapping(address => StorageUnitInfo) internal _storageUnits;
+    mapping(string => ConsumptionSession) internal _activeSessions;
     
     constructor(Parameters params) {
         _tools = new Tools();
@@ -36,7 +60,7 @@ contract Energy{
     function registerUnit(address addr, address owner) public{
         require(msg.sender == _owner,"Not authorized to register new unit");
         _storageUnitsNumber += 1;
-        _storageUnits[addr] = Tools.StorageUnitInfo(true,owner,0);
+        _storageUnits[addr] = StorageUnitInfo(true,owner,0);
         _storageUnitAddresses.push(addr);
     }
     function disableStorageUnit(address addr) public{
@@ -45,6 +69,17 @@ contract Energy{
     }
     function getStorageUnits() public view returns(address[] memory) {
         return _storageUnitAddresses;
+    }
+    function getStorageUnitsInfo() public view returns(StorageUnitInfo[] memory){
+        StorageUnitInfo[] memory unitsInfo = new StorageUnitInfo[](_storageUnitAddresses.length);
+        StorageUnitInfo memory unit;
+        for(uint i = 0; i < _storageUnitAddresses.length; i++){
+            unit = _storageUnits[_storageUnitAddresses[i]];
+            if (!unit.state) continue;
+            unitsInfo[i] = unit;
+            unitsInfo[i].owner = _storageUnitAddresses[i]; //Instead of owner, return the unit address
+        }
+        return unitsInfo;
     }
     function getStorageUnitState(address addr) public view returns(bool){
         return _storageUnits[addr].state;
@@ -93,9 +128,13 @@ contract Energy{
         _storageUnits[unit].kwh -= kwh; //Remove kwh to be consumsed from available kwh (not consumed yet just locked for consumtions)
         
         //Start consumption session and lock ent ammount
-        _activeSessions[consumptionSessionID] = Tools.ConsumptionSession(true,kwh,rate,block.timestamp,consumer,unit);
+        _activeSessions[consumptionSessionID] = ConsumptionSession(true,kwh,rate,block.timestamp,consumer,unit);
         _consumptionSessions.push(consumptionSessionID);
         _ENT.lockAmmount(consumer,unit,entAmmount);
+        if (!_userConsumptionSessionExists[consumer][consumptionSessionID]){
+            _userConsumptionSessions[consumer].push(consumptionSessionID);
+            _userConsumptionSessionExists[consumer][consumptionSessionID] = true;
+        }
         return consumptionSessionID; //Return back the consumption session id
     }
     function getConsumptionSessionEnergy(address unit, address consumer) public view returns(uint256){
@@ -103,6 +142,27 @@ contract Energy{
         require(_storageUnits[unit].state, "Storage unit not active");
         string memory consumptionSessionID = getConsumptionSessionID(unit, consumer);
         return _activeSessions[consumptionSessionID].kwh;
+    }
+    function getUserConsumptionSessions(address addr) public view returns(UserConsumptionSession[] memory sessions){
+        uint length = 1;
+        UserConsumptionSession[] memory userSessions = new UserConsumptionSession[](length);
+        for(uint i; i < _userConsumptionSessions[addr].length; i++){
+            string memory sessionId = _userConsumptionSessions[addr][i];
+            if (!_activeSessions[sessionId].state) continue; //Keep only active sessions
+            userSessions[i] = (
+                UserConsumptionSession(
+                    sessionId,
+                    _activeSessions[sessionId].kwh,
+                    _activeSessions[sessionId].timestamp,
+                    _activeSessions[sessionId].unit));
+            assembly {
+                // Increase array length by one
+                mstore(userSessions, add(length, 1))
+            }
+            length = userSessions.length;
+        }
+        return userSessions;
+        //UserConsumptionSession
     }
     function consume(address unit,address consumer,uint256 kwh) public returns(uint256){
         require(msg.sender == _owner,"You are not authorized to execute this method");
@@ -132,14 +192,14 @@ contract Energy{
     function clearOldSessions() public{
         uint length = _consumptionSessions.length;
         for (uint256 i = 0; i < length; i++) {
-            Tools.ConsumptionSession memory session = _activeSessions[_consumptionSessions[i]];
+            ConsumptionSession memory session = _activeSessions[_consumptionSessions[i]];
             if (block.timestamp >= session.timestamp + _parameters.H()) {
                 //Return locked ENT to consumer and lockeg kWh to storage unit :
                 _ENT.unlockAmmount(session.consumer,session.unit,0); //Unlock locked ENT
                 _storageUnits[session.unit].kwh += session.kwh; //Unlock locked Unit kWh
                 _totalKwh += session.kwh;
                 //Remove session :
-                _activeSessions[_consumptionSessions[i]] = Tools.ConsumptionSession(false,0,0,0,address(0),address(0));
+                _activeSessions[_consumptionSessions[i]] = ConsumptionSession(false,0,0,0,address(0),address(0));
                 _consumptionSessions[i] = _consumptionSessions[length - 1];
                 _consumptionSessions.pop();
             }

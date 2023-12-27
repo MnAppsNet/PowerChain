@@ -2,15 +2,12 @@ import React, { useState, useEffect } from "react"
 import Sidebar from "./Sidebar";
 import Tokens from "./pages/Tokens.js";
 import Energy from "./pages/Energy.js";
-import {
-  Flex,
-  Box,
-  Text,
-  Alert
-} from '@chakra-ui/react'
+import Voting from "./pages/Voting.js";
 import {
     FiHome,
-    FiWind
+    FiWind,
+    FiUsers,
+    
   } from 'react-icons/fi'
 
 const Dashboard = (props) => {
@@ -18,16 +15,22 @@ const Dashboard = (props) => {
     class Sections{
         static Tokens = 1;
         static Energy = 2;
+        static Voting = 3;
     }
-
-    const [connected, setConnected] = useState(false);
     const [section,setSection] = useState(Sections.Tokens)
-    const controller = props.controller
-    const web3 = controller.web3
+
+    const controller = props.controller;
     const menuItems = [
-        { name: controller.strings.tokens, icon: FiHome, action:()=>{ controller.updateBalance(); setSection(Sections.Tokens)} },
-        { name: controller.strings.energy, icon: FiWind, action:()=>{ controller.updateTotalEnergy(); setSection(Sections.Energy)} }
+        { name: controller.strings.tokens, icon: FiHome, action:()=>{ controller.getBalance(); setSection(Sections.Tokens)} },
+        { name: controller.strings.energy, icon: FiWind, action:()=>{ 
+            controller.getTotalEnergy(); 
+            controller.getConsumptionSessions();
+            controller.getStorageUnitsInfo();
+            setSection(Sections.Energy)} }
     ]
+    if (controller.voter){
+        menuItems.push({name:controller.strings.voting ,icon: FiUsers, action:()=>{ controller.getVotes(controller.address); setSection(Sections.Voting)}});
+    }
     return (
         <div>
             { controller.connected ? (
@@ -37,6 +40,9 @@ const Dashboard = (props) => {
                     )}
                     {section === Sections.Energy && (
                         <Energy controller={controller}/>
+                    )}
+                    {section === Sections.Voting && (
+                        <Voting controller={controller}/>
                     )}
                 </Sidebar>
             )

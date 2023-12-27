@@ -28,15 +28,15 @@ const Tokens = (props) => {
                     popup: {
                         type: "number",
                         title: controller.strings.transfer,
-                        label: "Transfer",
+                        label: controller.strings.transfer,
                         inputItems: [{
                             id: "account",
-                            text: "Account Address",
+                            text: controller.strings.accountAddress,
                             type: "text",
                             default: ""
                         }, {
                             id: "amount",
-                            text: "Amount",
+                            text: controller.strings.amount,
                             type: "number",
                             default: 0
                         }],

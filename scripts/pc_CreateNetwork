@@ -1,7 +1,6 @@
 #!/bin/bash
 source tools.sh
 
-PLACEHOLDER_ADMIN="<ADMIN>"
 PLACEHOLDER_VALIDATORS="<VALIDATORS>"
 
 NETWORK_FOLDER="./network"
@@ -76,8 +75,6 @@ done
 #Create genesis file
 echo "Generating genesis file..."
 cp $SCRIPTPATH/config/genesis.json $NETWORK_FOLDER/genesis.json
-admin="0x$admin"
-sed -i "s/$PLACEHOLDER_ADMIN/$admin/g" "$NETWORK_FOLDER/genesis.json"
 sed -i "s/$PLACEHOLDER_VALIDATORS/$validator_addresses/g" "$NETWORK_FOLDER/genesis.json"
 v=0
 while [ "$validators" != "$v" ]; do
