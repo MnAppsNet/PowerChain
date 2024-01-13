@@ -7,21 +7,15 @@ try:
     parser = argparse.ArgumentParser(description='Deploy Smart Contract')
     parser.add_argument('path', type=str,
                         help='Path to smart contract')
-    parser.add_argument('icp', type=str, default="./geth.icp",
-                        help='Path to ICP file of a running network peer')
+    parser.add_argument('rpc', type=str, default="http://localhost:32301",
+                        help='Blockchain network RPC')
     try:
         args = parser.parse_args()
     except:
         parser.print_help()
         exit(0)
-
-    #Connect to blockchain
-    if ( not os.path.exists(args.icp) ):
-        print("Please provide a valid geth.icp file or run the script in a folder with a geth.icp file")
-        print("Make sure the account you are connecting to has some gas")
-        exit(0)
     
-    deployContract(args.icp,args.path)
+    deployContract(args.rpc,args.path)
 
 except Exception as e:
     raise e

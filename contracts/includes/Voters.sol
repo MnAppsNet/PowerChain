@@ -25,8 +25,8 @@ contract Voters{
     uint _VotersNumber;
     address _owner;
 
-    constructor(address addr) {
-        _tools = new Tools();
+    constructor(address addr, Tools tools) {
+        _tools = tools;
         _voters[addr] = true;
         _VotersNumber = 1;
         _owner = msg.sender;

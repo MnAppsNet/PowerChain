@@ -7,3 +7,4 @@ besu
 /ui/node_modules
 /ui/src/addresses.json
 /ui/src/contracts/*.json
+/storage_unit_scripts/account.key

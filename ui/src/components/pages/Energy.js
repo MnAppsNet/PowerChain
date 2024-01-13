@@ -1,15 +1,36 @@
-import React, { useState, useEffect } from "react"
-import {
-    Flex,
-    Box,
-    Text,
-    Button
-} from '@chakra-ui/react'
+import React from "react"
 import PanelList from "../PanelList.js";
+import Blockchain from "../../Blockchain.js";
 
 const Energy = (props) => {
-    const controller = props.controller
+    const controller = props.controller;
 
+    //Add "Consume" button on each storage unit label
+    const storageUnitInfo = controller.storageUnitInfo;
+    for (let i = 0; i < storageUnitInfo.length; i++) {
+        storageUnitInfo[i].button = {
+            popup: {
+                title: controller.strings.startSession,
+                label: controller.strings.consumeEnergy,
+                info: [
+                    controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.ENT]+" "+Blockchain.TOKENS.ENT,
+                    controller.strings.energy+ ": {amount * burnRate} kwh"
+                ],
+                inputItems: [{
+                    id: "account",
+                    text: controller.strings.storageUnitAddress,
+                    type: "text",
+                    default: storageUnitInfo[i].label
+                }, {
+                    id: "amount",
+                    text: controller.strings.burnAmount,
+                    type: "number",
+                    default: 0
+                }],
+                onClick: (...args) => controller.startConsumptionSession(...args)
+            }
+        };
+    }
     const panels = [
         //Total Energy Panel >>>>>
         {
@@ -17,46 +38,52 @@ const Energy = (props) => {
             info: [{
                 label: controller.strings.available,
                 value: (controller.totalEnergy + " kWh")
+            }, {
+                label: controller.strings.burnRate,
+                value: (controller.burnRate + " ENT / kWh")
+            }, {
+                label: controller.strings.mintRate,
+                value: (controller.mintRate + " ENT / kWh")
             }],
-            buttons: [
-                {
-                    button: {
-                        onClick: (...args) => controller.getTotalEnergy(...args)
-                    },
-                    text: controller.strings.refresh
-                }
-            ]
+            buttons: null
         },
         //User Consumption Sessions Panel >>>>>
         {
             header: controller.strings.consumptionSessions,
             info: controller.sessions,
-            buttons: [
-                {
-                    button: {
-                        onClick: (...args) => controller.getConsumptionSessions(...args)
-                    },
-                    text: controller.strings.refresh
+            buttons: [{
+                popup: {
+                    title: controller.strings.startSession,
+                    label: controller.strings.startSession,
+                    info: [
+                        controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.ENT]+" "+Blockchain.TOKENS.ENT,
+                        controller.strings.energy+ ": {amount * burnRate} kwh"
+                    ],
+                    inputItems: [{
+                        id: "account",
+                        text: controller.strings.storageUnitAddress,
+                        type: "text",
+                        default: ""
+                    }, {
+                        id: "amount",
+                        text: controller.strings.burnAmount,
+                        type: "number",
+                        default: 0
+                    }],
+                    onClick: (...args) => controller.startConsumptionSession(...args)
                 }
-            ]
+            }]
         },
         //Storage Units >>>>>
         {
             header: controller.strings.storageUnits,
-            info: controller.storageUnitInfo,
-            buttons: [
-                {
-                    button: {
-                        onClick: (...args) => controller.getStorageUnitsInfo(...args)
-                    },
-                    text: controller.strings.refresh
-                }
-            ]
+            info: storageUnitInfo,
+            buttons: null
         }
     ]
 
     return (
-        <PanelList panels={panels} controller={controller}/>
+        <PanelList panels={panels} controller={controller} />
     )
 }
 

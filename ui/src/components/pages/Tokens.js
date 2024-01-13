@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from "react"
-import {
-    Flex,
-    Box,
-    Text,
-    Button
-} from '@chakra-ui/react'
-import { SlRefresh } from "react-icons/sl";
-import PopupInput from "../PopupInput.js"
+import React from "react"
 import PanelList from "../PanelList.js";
 
 const Tokens = (props) => {
     const controller = props.controller;
 
     const panels = [
+        //Total ENT in Circulation Panel >>>>>
+        {
+            header: controller.strings.totalENT,
+            info: [{
+                label: controller.strings.total,
+                value: controller.totalENT + " ENT"
+            }],
+            buttons: null
+        },
         //ENT Tokens Panel >>>>>
         {
             header: controller.strings.ENTHeader,
-            info: [{
+            info: [
+            {
+                label: controller.strings.address,
+                value: controller.address
+            },
+            {
                 label: controller.strings.available,
                 value: (controller.balanceENT + " ENT")
             }, {
@@ -42,11 +48,6 @@ const Tokens = (props) => {
                         }],
                         onClick: (...args) => controller.transferENT(...args)
                     }
-                }, {
-                    button: {
-                        onClick: (...args) => controller.updateBalance(...args)
-                    },
-                    text: controller.strings.refresh
                 }
             ]
         },
@@ -79,18 +80,13 @@ const Tokens = (props) => {
                         }],
                         onClick: (...args) => controller.transferEUR(...args)
                     }
-                }, {
-                    button: {
-                        onClick: (...args) => controller.updateBalance(...args)
-                    },
-                    text: controller.strings.refresh
                 }
             ]
         }
     ]
 
     return (
-        <PanelList panels={panels} controller={controller}/>
+        <PanelList panels={panels} controller={controller} />
     )
 }
 

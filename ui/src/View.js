@@ -1,17 +1,13 @@
 import Login from "./components/Login.js";
 import Message from "./components/Message.js";
 import Dashboard from "./components/Dashboard.js"
-import getRevertReason from "eth-revert-reason";
 import {
   ChakraProvider,
-  Flex,
-  Box,
-  Text
 } from '@chakra-ui/react'
 import { Styles, Colors } from './Styles.js'
-import Web3 from "web3";
 import Controller from "./Controller.js";
 import Languages from "./strings.json"
+import Popup from "./components/Popup.js"
 import React from "react";
 
 class View extends React.Component {
@@ -29,12 +25,23 @@ class View extends React.Component {
       messageText: "",
       messageStatus: "",
       balance: { ENT: 0, EUR: 0 },
+      totalENT: 0,
       lockedBalance: { ENT: 0, EUR: 0 },
       totalEnergy: 0,
+      mintRate: 0,
+      burnRate: 0,
       voter: false,
       votes: [],
       sessions: [],
       storageUnitInfo: [],
+      popup:{
+        open:false,
+        state:{},
+        title:"",
+        onClick:()=>{},
+        inputItems:[],
+        info:[]
+      },
     };
     this.state.strings = Languages["EN"];
     this.controller = new Controller(this);
@@ -44,18 +51,25 @@ class View extends React.Component {
     if (prevState.web3 !== this.state.web3) {
       if (this.state.web3 != null) {
         // Request account access if needed
+        try{
         const controller = this.controller;
         window.ethereum.enable().then(function (accounts) {
           console.log('Connected to MetaMask');
           console.log('Account:', accounts[0]);
           controller.connect(accounts[0]);
         }).catch(function (error) {
-          console.error('Error connecting to MetaMask:', error);
+          console.error(controller.strings.metamaskError, error);
+          controller.showMessage(controller.strings.metamaskError);
         });
+      }catch{
+        this.setState({web3 : null});
+        console.error(this.controller.strings.metamaskNotFound);
+        this.controller.showMessage(this.controller.strings.metamaskNotFound);
+      }
       }
     }
     if (prevState.address !== this.state.address) {
-      if (this.state.address != "") {
+      if (this.state.address !== "") {
         this.controller.isVoter();
         this.controller.getBalance();
       }
@@ -66,16 +80,18 @@ class View extends React.Component {
     return (
       <ChakraProvider resetCSS>
         <div style={this.state.styles.main}>
-          {this.state.messageText != "" ? (<Message controller={this.controller} text={this.state.messageText} status={this.state.messageStatus}></Message>) : ("")}
+          {this.state.messageText !== "" ? (<Message controller={this.controller} text={this.state.messageText} status={this.state.messageStatus}></Message>) : ("")}
           {this.state.web3 == null ? (
             <Login controller={this.controller}></Login>
           ) : (
-            <Dashboard controller={this.controller}></Dashboard>
+            <>
+              <Popup properties={this.state.popup}></Popup>
+              <Dashboard controller={this.controller}></Dashboard>
+            </>
           )}
         </div>
       </ChakraProvider>
     );
-
   }
 }
 

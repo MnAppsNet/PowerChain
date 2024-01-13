@@ -21,10 +21,10 @@ contract PowerChain {
 
     constructor() {
         _tools = new Tools();
-        _banker = new Banker();
-        _parameters = new Parameters();
-        _Voters = new Voters(msg.sender);
-        _energy = new Energy(_parameters);
+        _banker = new Banker(_tools);
+        _parameters = new Parameters(_tools);
+        _Voters = new Voters(msg.sender,_tools);
+        _energy = new Energy(_parameters,_tools);
     }
 
     //-------------------------------------------------------------------------------
@@ -40,22 +40,24 @@ contract PowerChain {
     function getStorageUnitEnergy(
         address unit
     ) external returns (uint256 unitEnergy) {
-        //Returns storage unit energy in kWh
-        try _energy.getAvailableKwh(unit) returns (uint256 energy) {
+        //Returns storage unit energy in wh
+        try _energy.getAvailableEnergy(unit) returns (uint256 energy) {
             return energy;
         } catch Error(string memory reason) {
             emit Error(reason);
         }
     }
 
-    function getTotalKwh() external returns (uint256 kwh) {
-        try _energy.getTotalKwh() returns (uint256 totalKwh) {
-            return totalKwh;
+    function getTotalEnergy() external returns (uint256 wh) {
+        try _energy.getTotalEnergy() returns (uint256 totalWh) {
+            return totalWh;
         } catch Error(string memory reason) {
             emit Error(reason);
         }
     }
-
+    function getEnergyRates() external view returns(uint256 mint, uint256 burn){
+        return (_energy.getMintRate(),_energy.getBurnRate());
+    }
     function registerStorageUnit(address unit, address owner) external {
         if (_energy.getStorageUnitState(unit)) {
             emit Error("Storage unit is already active...");
@@ -117,7 +119,7 @@ contract PowerChain {
 
     function getConsumptionSessionEnergy(
         address addr
-    ) external returns (uint256 sessionKwh) {
+    ) external returns (uint256 sessionWh) {
         //Get the available energy of a consumption session
         address unit;
         address consumer;
@@ -131,31 +133,31 @@ contract PowerChain {
             consumer = addr;
         }
         try _energy.getConsumptionSessionEnergy(msg.sender, addr) returns (
-            uint256 kwh
+            uint256 wh
         ) {
-            return kwh;
+            return wh;
         } catch Error(string memory reason){
             emit Error(reason);
         }
     }
-    function energyProduced(address producer, uint256 kwh) external {
+    function energyProduced(address producer, uint256 wh) external {
         if (!_energy.getStorageUnitState(msg.sender)) {
             emit Error("Method can be called only by active storage units");
             return;
         }
-        try _energy.produce(msg.sender, producer, kwh) {} catch Error(
+        try _energy.produce(msg.sender, producer, wh) {} catch Error(
             string memory reason
         ) {
             emit Error(reason);
         }
     }
 
-    function energyConsumed(address consumer, uint kwh) external {
+    function energyConsumed(address consumer, uint wh) external {
         if (!_energy.getStorageUnitState(msg.sender)) {
             emit Error("Method can be called only by active storage units");
             return;
         }
-        try _energy.consume(msg.sender, consumer, kwh) {} catch Error(
+        try _energy.consume(msg.sender, consumer, wh) {} catch Error(
             string memory reason
         ) {
             emit Error(reason);
@@ -204,7 +206,7 @@ contract PowerChain {
             _energy.transferEnergyTokens(
                 msg.sender,
                 to,
-                amnt * _tools.multiplier()
+                amnt
             )
         {} catch Error(string memory reason) {
             emit Error(reason);
@@ -224,14 +226,14 @@ contract PowerChain {
 
     function transfereEuro(address to, uint256 amnt) external {
         try
-            _banker.transfereEuro(msg.sender, to, amnt * _tools.multiplier())
+            _banker.transfereEuro(msg.sender, to, amnt)
         {} catch Error(string memory reason) {
             emit Error(reason);
         }
     }
 
     function lockeEuro(uint256 amnt) external {
-        try _banker.lockeEuro(msg.sender, amnt * _tools.multiplier()) {} catch Error(
+        try _banker.lockeEuro(msg.sender, amnt) {} catch Error(
             string memory reason
         ) {
             emit Error(reason);
@@ -265,6 +267,13 @@ contract PowerChain {
             return eEuroAddr;
         } catch Error(string memory reason) {
             emit Error(reason);
+        }
+    }
+    function getTotalENT() external returns (uint256 amnt){
+        try _energy.getTotalENT() returns(uint256 ent){
+            return ent;
+        } catch Error(string memory reason){
+            emit Error((reason));
         }
     }
 

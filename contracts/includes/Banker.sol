@@ -3,12 +3,15 @@
 pragma solidity ^0.8.0;
 
 import "./Token.sol";
+import "./Tools.sol";
 
 contract Banker{
     Token internal _eEuro;
     address private _owner;
     address _banker;
-    constructor( ) {
+    Tools _tools;
+    constructor( Tools tools ) {
+        _tools = tools;
         _owner = msg.sender;
         _eEuro = new Token("eEuro");
         _banker = address(0);

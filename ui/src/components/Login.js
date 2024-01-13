@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import {
   ChakraProvider,
-  Input,
   Flex,
   Text,
   Image,
@@ -13,20 +12,19 @@ const Login = (props) => {
   const controller = props.controller;
 
   useEffect(() => {
-    if (localStorage.getItem("connected", "") != "") {
-      controller.web3 = new Web3(window.ethereum);
-    }
-    window.ethereum.on("accountsChanged", (e) => {
-      if (e.length == 0) {
-        localStorage.setItem("connected", "");
+    try {
+      const connected = sessionStorage.getItem("connected", "");
+      console.log(connected);
+      if (connected !== "" && connected !== null) {
+        controller.web3 = new Web3(window.ethereum);
+      }
+      window.ethereum.on("accountsChanged", (e) => {
+        sessionStorage.setItem("connected", "");
         controller.web3 = null;
         controller.connected = false;
-      } else {
-        localStorage.setItem("connected", e[0]);
-      }
-    });
+      });
+    } catch { }
   }, [])
-
 
   //const [RPCUrl, setRPCUrl] = useState('');
   //const handleInputRPCUrl = (event) => {
@@ -44,8 +42,10 @@ const Login = (props) => {
     //Connect with MetaMask:
     if (window.ethereum) {
       controller.web3 = new Web3(window.ethereum);
+      sessionStorage.setItem("connected", "x");
     } else {
-      console.error('MetaMask not detected! Please install MetaMask.');
+      console.error(controller.strings.metamaskNotFound);
+      controller.showMessage(controller.strings.metamaskNotFound);
     }
   }
   return (
@@ -58,8 +58,7 @@ const Login = (props) => {
         textAlign="center"
         paddingTop="20vh"
         gap="0.2em"
-        mt={4}
-      >
+        mt={4} >
         <Image height="100px" width="100px" src="logo192.png" />
         <Text
           style={controller.styles.logoText}>PowerChain</Text>

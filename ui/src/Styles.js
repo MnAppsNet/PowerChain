@@ -52,7 +52,7 @@ export const Styles = {
   button: {
     size:"md",
     variant:"solid",
-    inlineSize:"100%",
+    width:"fit-content",
     overflowWrap: "break-word",
     fontSize:"0.9em",
     borderWidth:"0.1em",
@@ -65,6 +65,18 @@ export const Styles = {
     borderWidth:"0.1em",
     borderColor:"black"
   },
+  buttonRefresh: {
+    position:"absolute",
+    right:"5%",
+    top:"90%",
+    width:"2.5em",
+    height:"2.5em",
+    borderRadius:"100%",
+    size:"2em",
+    borderWidth:"0.05em",
+    borderColor:"black",
+    zIndex:"9999"
+  },
   itemList:{
     display:"flex",
     flexWrap:"wrap",
@@ -74,8 +86,7 @@ export const Styles = {
   item:{
     display:"flex",
     flexDirection:"column",
-    width:"33%",
-    flex:"1 0 33%"
+    width:"fit-content"
   },
   alert : {
     position: 'fixed',

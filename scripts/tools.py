@@ -18,11 +18,11 @@ def sendEth(icp,account,amount):
     tx =  w3.eth.get_transaction(tx_hash)
     pprint(tx)
 
-def deployContract(icp,path):
+def deployContract(rpc,path):
 
     install_solc(SOLC_VERSION)
 
-    w3 = Web3(Web3.IPCProvider(icp,timeout=15))
+    w3 = Web3(Web3.HTTPProvider(rpc))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     #Compile contract
@@ -49,7 +49,7 @@ def deployContract(icp,path):
     #Deploy Contract
     w3.eth.default_account = w3.eth.accounts[0]
     contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    tx_hash = contract.constructor().transact()
+    tx_hash = contract.constructor().transact({"gasPrice":0})
     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
     contract = {
         "name":main_contract,

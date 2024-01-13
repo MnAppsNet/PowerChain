@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Blockchain from "./Blockchain";
+import Web3, { validator } from "web3";
+import Tokens from "./components/pages/Tokens";
 
 class Controller {
 
@@ -29,7 +31,11 @@ class Controller {
     get voter() { return this.view.state.voter; }
     get votes() { return this.view.state.votes; }
     get sessions() { return this.view.state.sessions; }
-    get storageUnitInfo() {return this.view.state.storageUnitInfo; }
+    get storageUnitInfo() { return this.view.state.storageUnitInfo; }
+    get totalENT() { return this.view.state.totalENT; }
+    get mintRate() { return this.view.state.mintRate; }
+    get burnRate() { return this.view.state.burnRate; }
+    get popup() { return this.view.state.popup; }
 
     //Setters >>>>>
     set styles(v) { this.view.setState({ styles: v }); }
@@ -42,7 +48,6 @@ class Controller {
     set balance(v) { this.view.setState({ balance: v }); }
     set lockedBalance(v) { this.view.setState({ lockedBalance: v }); }
     set totalEnergy(v) { this.view.setState({ totalEnergy: v }); }
-    set address(v) { this.view.setState({ address: v }); }
     set web3(v) {
         if (v != null) v.config.handleRevert = true;
         this.view.setState({ web3: v });
@@ -50,16 +55,20 @@ class Controller {
     set voter(v) { this.view.setState({ voter: v }); }
     set votes(v) { this.view.setState({ votes: v }); }
     set sessions(v) { this.view.setState({ sessions: v }); }
-    set storageUnitInfo(v) {this.view.setState({ storageUnitInfo: v}); }
+    set storageUnitInfo(v) { this.view.setState({ storageUnitInfo: v }); }
+    set totalENT(v) { this.view.setState({ totalENT: v }); }
+    set mintRate(v) { this.view.setState({ mintRate: v}); }
+    set burnRate(v) { this.view.setState({ burnRate: v}); }
+    set popup(v) { this.view.setState({ popup: v}); }
 
     //Voters >>>>>
-    isVoter() {
+    async isVoter() {
         this.model.executeViewMethod(
             (result) => {
                 this.voter = result;
             }, Blockchain.METHODS.IS_VOTER);
     }
-    addVoter(address) {
+    async addVoter(address) {
         if (!this.web3.utils.isAddress(address)) {
             this.showMessage(this.strings.invalidAddress + " (" + address + ")");
             return;
@@ -70,7 +79,7 @@ class Controller {
                 this.getVotes(this.address);
             }, Blockchain.METHODS.ADD_VOTER, address)
     }
-    removeVoter(address) {
+    async removeVoter(address) {
         if (!this.web3.utils.isAddress(address)) {
             this.showMessage(this.strings.invalidAddress + " (" + address + ")");
             return;
@@ -82,7 +91,7 @@ class Controller {
                 this.getVotes(this.address);
             }, Blockchain.METHODS.REMOVE_VOTER, address)
     }
-    addStorageUnit(address, owner) {
+    async addStorageUnit(address, owner) {
         if (!this.web3.utils.isAddress(address)) {
             this.showMessage(this.strings.invalidAddress + " (" + address + ")");
             return;
@@ -97,7 +106,7 @@ class Controller {
                 this.getVotes(this.address);
             }, Blockchain.METHODS.ADD_STORAGE_UNIT, address, owner)
     }
-    removeStorageUnit(address) {
+    async removeStorageUnit(address) {
         if (!this.web3.utils.isAddress(address)) {
             this.showMessage(this.strings.invalidAddress + " (" + address + ")");
             return;
@@ -108,7 +117,7 @@ class Controller {
                 this.getVotes(this.address);
             }, Blockchain.METHODS.REMOVE_STORAGE_UNIT, address)
     }
-    getVotes(address) {
+    async getVotes(address) {
         this.model.executeViewMethod(
             (results) => {
                 const votes = []
@@ -122,7 +131,7 @@ class Controller {
 
                     })
                 });
-                if (votes.length == 0) {
+                if (votes.length === 0) {
                     votes.push({
                         label: this.strings.noData
                     })
@@ -132,32 +141,39 @@ class Controller {
     }
 
     //Energy >>>>>
-    getTotalEnergy() {
-        if (this.model.contract == null) return;
+    async getTotalEnergy() {
         this.model.executeViewMethod(
             (results) => {
-                this.totalEnergy = this.web3.utils.fromWei(results, "ether");
+                this.totalEnergy = Number(results) / 1000;
             }, Blockchain.METHODS.GET_TOTAL_KWH
         );
     }
-    getConsumptionSessions() {
+    async getEnergyRates() {
+        this.model.executeViewMethod(
+            (results) => {
+                this.mintRate = this.fromBigNumber(results["mint"]);
+                this.burnRate = this.fromBigNumber(results["burn"]);
+            }, Blockchain.METHODS.GET_ENERGY_RATES
+        );
+    }
+    async getConsumptionSessions() {
         const address = this.address;
         this.model.executeViewMethod(
             (results) => {
                 const sessions = []
                 results.forEach((item) => {
                     const session = item["sessionId"];
-                    const kwh = this.web3.utils.fromWei(item["kwh"],"ether");
+                    const kwh = Number(item["wh"]) / 1000;
                     const timestamp = item["timestamp"];
                     const unit = item["unit"];
-                    if (session != ""){
+                    if (session !== "") {
                         sessions.push({
-                            label: timestamp + ">> " +this.strings.storageUnit + ": " + unit,
+                            label: timestamp + ">> " + this.strings.storageUnit + ": " + unit,
                             value: kwh + " kWh",
                         })
                     }
                 });
-                if (sessions.length == 0) {
+                if (sessions.length === 0) {
                     sessions.push({
                         label: this.strings.noData
                     })
@@ -165,20 +181,22 @@ class Controller {
                 this.sessions = sessions;
             }, Blockchain.METHODS.GET_CONSUMPTION_SESSIONS, address)
     }
-    getStorageUnitsInfo() {
+    async getStorageUnitsInfo() {
         this.model.executeViewMethod(
             (results) => {
                 const unitInfo = []
                 results.forEach((item) => {
                     const state = item["state"];
-                    const unitAddress = item["owner"];
-                    const kwh = this.web3.utils.fromWei(item["kwh"],"ether");
-                    unitInfo.push({
-                        label: unitAddress,
-                        value: kwh + " kWh",
-                    })
+                    if (state) {
+                        const unitAddress = item["owner"];
+                        const kwh = Number(item["wh"]) / 1000;
+                        unitInfo.push({
+                            label: unitAddress,
+                            value: kwh + " kWh",
+                        })
+                    }
                 });
-                if (unitInfo.length == 0) {
+                if (unitInfo.length === 0) {
                     unitInfo.push({
                         label: this.strings.noData
                     })
@@ -186,44 +204,54 @@ class Controller {
                 this.storageUnitInfo = unitInfo;
             }, Blockchain.METHODS.GET_STORAGE_UNIT_INFO)
     }
-    startConsumptionSession(storageUnit,entAmount) {
+    async startConsumptionSession(storageUnit, entAmount) {
         if (!this.web3.utils.isAddress(storageUnit)) {
             this.showMessage(this.strings.invalidAddress + " (" + storageUnit + ")");
             return;
         }
-        if (entAmount <= 0){
+        if (entAmount <= 0) {
             this.showMessage(this.strings.invalidEntAmount);
+            return;
+        }
+        if (Number(this.balance[Blockchain.TOKENS.ENT]) < Number(entAmount)) {
+            this.showMessage(this.strings.unavailableBalance);
             return;
         }
         this.model.executeModifyStateMethod(
             (results) => {
                 console.log(results);
-            },Blockchain.START_CONSUMPTION_SESSION,storageUnit,entAmount
+            },  Blockchain.METHODS.START_CONSUMPTION_SESSION, storageUnit, this.toBiglNumber(entAmount)
         );
     }
 
     //Tokens >>>>>
-    getBalance() {
+    async getTotalENT(){
+        this.model.executeViewMethod((results) => {
+            this.totalENT = this.fromBigNumber(results);
+        }, Blockchain.METHODS.GET_TOTAL_ENT);
+    }
+    async getBalance() {
         let avail = { ENT: 0, EUR: 0 };
         let locked = { ENT: 0, EUR: 0 };
         this.model.executeViewMethod((results) => {
-            avail.ENT = Number(this.web3.utils.fromWei(results.available, "ether")); //Not really ether but ENT uses also 10^18 multiplier for decimals
-            locked.ENT = Number(this.web3.utils.fromWei(results.locked, "ether"));
+            avail.ENT = this.fromBigNumber(results.available);
+            locked.ENT = this.fromBigNumber(results.locked);
             this.model.executeViewMethod((results) => {
-                avail.EUR = Number(this.web3.utils.fromWei(results.available, "ether"));
-                locked.EUR = Number(this.web3.utils.fromWei(results.locked, "ether"));
+                avail.EUR = this.fromBigNumber(results.available);
+                locked.EUR = this.fromBigNumber(results.locked);
                 this.balance = avail;
                 this.lockedBalance = locked;
+                this.getTotalENT();
             }, Blockchain.METHODS.BALANCE_EUR)
         }, Blockchain.METHODS.BALANCE_ENT)
     }
-    transferENT(account, amount) {
+    async transferENT(account, amount) {
         this.transferToken(Blockchain.TOKENS.ENT, account, amount)
     }
-    transferEUR(account, amount) {
+    async transferEUR(account, amount) {
         this.transferToken(Blockchain.TOKENS.EUR, account, amount)
     }
-    transferToken(token, account, amount) {
+    async transferToken(token, account, amount) {
         let transferMethod = "";
         switch (token) {
             case Blockchain.TOKENS.ENT:
@@ -239,16 +267,25 @@ class Controller {
             this.showMessage(this.strings.unavailableBalance);
             return;
         }
-        if (!this.web3.utils.isAddress(account)) {
+        if (!this.isAddress(account)) {
             this.showMessage(this.strings.invalidAddress);
             return;
         }
         this.model.executeModifyStateMethod((_) => {
             this.getBalance();
-        }, transferMethod, account, amount)
+        }, transferMethod, account, this.toBiglNumber(amount))
     }
 
     //Other >>>>>
+    toBiglNumber(number){
+        return Web3.utils.toWei(number,"ether")
+    }
+    fromBigNumber(number){
+        return Number(Web3.utils.fromWei(number,"ether"))
+    }
+    isAddress(address){
+        return validator.isAddress(address);
+    }
     connect(address) {
         if (this.web3 == null) return;
         this.web3.eth.net.isListening()
@@ -273,6 +310,27 @@ class Controller {
         this.messageStatus = ((error) ? "error" : "info");
         this.messageText = text;
         this.messageTimeout = setTimeout(() => { this.clearMessage() }, 10000); //Hide message after 10 seconds
+    }
+    showPopup(state,title,onclick,inputItems,info=[]){
+        this.popup = {
+            open:true,
+            state:state,
+            title:title,
+            onClick:onclick,
+            inputItems:inputItems,
+            controller:this,
+            info:info
+        }
+    }
+    closePopup(){
+        this.popup = {
+            open:false,
+            state:{},
+            title:"",
+            onClick:()=>{},
+            inputItems:[],
+            info:[]
+        }
     }
     disconect() {
         this.connected = false;

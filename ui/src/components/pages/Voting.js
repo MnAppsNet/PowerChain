@@ -14,18 +14,11 @@ const Voting = (props) => {
             //My Votes >>>>>
             header: controller.strings.myVotes,
             info: controller.votes,
-            buttons: [
-                {
-                    button: {
-                        onClick: (...args) => controller.getVotes(...args)
-                    },
-                    text: controller.strings.refresh
-                }
-            ]
+            buttons: null
         }, {
             //Cast Votes >>>>>
             header: controller.strings.castVote,
-            info: [],
+            info: null,
             buttons: [
                 {
                     popup: {

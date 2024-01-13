@@ -17,9 +17,11 @@ export class Blockchain {
         EUR: "EUR",
     }
     static METHODS = {
-        GET_TOTAL_KWH: "getTotalKwh",
+        GET_TOTAL_KWH: "getTotalEnergy",
+        GET_ENERGY_RATES: "getEnergyRates",
         BALANCE_EUR: "balanceeEuro",
         BALANCE_ENT: "balanceENT",
+        GET_TOTAL_ENT: "getTotalENT",
         TRANSFER_ENT: "transferENT",
         TRANSFER_EUR: "transfereEuro",
         IS_VOTER: "isVoter",
@@ -50,6 +52,7 @@ export class Blockchain {
         }
     }
     executeViewMethod(callback, method, ...args) {
+        if (this.contract == null) return;
         this.contract.methods[method](...args).call({ from: this.controller.address })
             .then((results) => {
                 try {

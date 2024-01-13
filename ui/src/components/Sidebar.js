@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 import {
   ChakraProvider,
   IconButton,
@@ -6,13 +6,11 @@ import {
   CloseButton,
   Flex,
   Icon,
-  useColorModeValue,
   Text,
   Drawer,
   DrawerContent,
   useDisclosure,
   Image,
-  FlexProps,
 } from '@chakra-ui/react'
 import {
   FiMenu
@@ -28,7 +26,7 @@ const Sidebar = (props) => {
   return (
     <ChakraProvider resetCSS>
       <Box minH="100vh" bg={controller.colors.background}>
-        <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
+        <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }}/>
         <Drawer
           isOpen={isOpen}
           placement="left"
@@ -42,7 +40,7 @@ const Sidebar = (props) => {
         </Drawer>
         {/* mobilenav */}
         <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
-        <Box ml={{ base: 0, md: 60 }} p="4">
+        <Box ml={{ base: 0, md: 60 }} p="4" overflowY="auto">
           { props.children }
         </Box>
       </Box>
@@ -72,6 +70,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
           {link.name}
         </NavItem>
       ))}
+      <a href='https://www.auth.gr/' target='_blank' rel="noreferrer"><Image position="fixed" bottom="10px" left="0.5em" width="12em" src="logo_auth.png" /></a>
     </Box>
   )
 }
