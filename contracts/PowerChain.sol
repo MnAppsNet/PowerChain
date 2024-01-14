@@ -171,6 +171,12 @@ contract PowerChain {
     }
 
     //-------------------------------------------------------------------------------
+    //Parameters >>>>>>>
+    function getParameters() external view returns(uint256 M, uint256 B, uint256 C, uint256 H, uint256 F) {
+        return (_parameters.M(),_parameters.B(),_parameters.C(),_parameters.H(),_parameters.F() );
+    }
+
+    //-------------------------------------------------------------------------------
     //Banker >>>>>>>
     function changeBanker(address addr) external {
         string memory voteString = _tools.concat("changeBankerTo_", addr);
@@ -182,7 +188,6 @@ contract PowerChain {
             }
         }
     }
-
     function minteEuro(address addr, uint256 amnt) external {
         try _banker.minteEuro(msg.sender, addr, amnt) {} catch Error(
             string memory reason
@@ -190,13 +195,18 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function burneEuro(address addr, uint amnt) external {
         try _banker.burnLockedeEuro(addr, amnt) {} catch Error(
             string memory reason
         ) {
             emit Error(reason);
         }
+    }
+    function getBankerAddress() external view returns (address) {
+        return _banker.getBanker();
+    }
+    function getTotalEeuro() external view returns (uint256){
+        return _banker.getTotalEeuro();
     }
 
     //-------------------------------------------------------------------------------
@@ -244,7 +254,7 @@ contract PowerChain {
         external
         returns (uint256 available, uint256 locked)
     {
-        try _banker.energyTokenBalance(msg.sender) returns (
+        try _banker.eEuroBalance(msg.sender) returns (
             uint256 avail,
             uint256 lock
         ) {
@@ -263,7 +273,7 @@ contract PowerChain {
     }
 
     function eEuroAddress() external returns (address addr) {
-        try _banker.geteEuroAddress() returns (address eEuroAddr) {
+        try _banker.getEeuroAddress() returns (address eEuroAddr) {
             return eEuroAddr;
         } catch Error(string memory reason) {
             emit Error(reason);

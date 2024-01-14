@@ -22,6 +22,9 @@ export class Blockchain {
         BALANCE_EUR: "balanceeEuro",
         BALANCE_ENT: "balanceENT",
         GET_TOTAL_ENT: "getTotalENT",
+        GET_TOTAL_EEURO: "getTotalEeuro",
+        GET_BANKER_ADDRESS: "getBankerAddress",
+        GET_NETWORK_PARAMETERS: "getParameters",
         TRANSFER_ENT: "transferENT",
         TRANSFER_EUR: "transfereEuro",
         IS_VOTER: "isVoter",
@@ -33,6 +36,7 @@ export class Blockchain {
         START_CONSUMPTION_SESSION: "startConsumptionSession",
         GET_CONSUMPTION_SESSIONS: "getUserConsumptionSessions",
         GET_STORAGE_UNIT_INFO: "getStorageUnitsInfo",
+        SET_BANKER_ADDRESS: "changeBanker",
     }
     constructor(controller) {
         this.contracts = new Contracts();

@@ -14,17 +14,23 @@ contract Banker{
         _tools = tools;
         _owner = msg.sender;
         _eEuro = new Token("eEuro");
-        _banker = address(0);
+        _banker = address(0); //No banker initially
+    }
+    function getBanker() public view returns(address){
+        return _banker;
     }
     function changeBanker(address addr) public{
         require(msg.sender == _owner,"You are not authorized to execute this method");
         _banker = addr;
     }
-    function geteEuroAddress() public view returns(address token){
+    function getEeuroAddress() public view returns(address token){
         return address(_eEuro);
     }
-    function energyTokenBalance(address addr) public view returns(uint256 available,uint256 locked){
+    function eEuroBalance(address addr) public view returns(uint256 available,uint256 locked){
         return (_eEuro.balance(addr),_eEuro.lockedBalance(addr));
+    }
+    function getTotalEeuro() public view returns(uint256){
+        return _eEuro.total();
     }
     function transfereEuro(address from, address to, uint256 amnt) public {
         require(msg.sender == _owner,"You are not authorized to execute this method");

@@ -58,14 +58,11 @@ contract Token{
     }
     function unlockAmmount(address addr, address contractor, uint256 amnt) public {
         require(msg.sender == _owner, "You are not allowed to execute this method");
-        require(_balances[addr].lockedFrom[contractor] >= amnt, "Not enough tokens to unlock");
-        uint256 amount = amnt;
-        if (amnt == 0){//If amount not provided, unlock the full amount
-            amount = _balances[addr].lockedFrom[contractor];
-        }
-        _balances[addr].locked -= amount;
-        _balances[addr].lockedFrom[contractor] -= amount;
-        _balances[addr].available += amount;
+        if (_balances[addr].lockedFrom[contractor] < amnt)
+            amnt = _balances[addr].lockedFrom[contractor]; //Unlock full amount
+        _balances[addr].locked -= amnt;
+        _balances[addr].lockedFrom[contractor] -= amnt;
+        _balances[addr].available += amnt;
     }
     function transfer(address from, address to, uint256 amnt) public{
         require(msg.sender == _owner, "You are not allowed to execute this method");

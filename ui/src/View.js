@@ -26,6 +26,7 @@ class View extends React.Component {
       messageStatus: "",
       balance: { ENT: 0, EUR: 0 },
       totalENT: 0,
+      totalEeuro: 0,
       lockedBalance: { ENT: 0, EUR: 0 },
       totalEnergy: 0,
       mintRate: 0,
@@ -34,6 +35,8 @@ class View extends React.Component {
       votes: [],
       sessions: [],
       storageUnitInfo: [],
+      bankerAddress: "",
+      networkParameters: {},
       popup:{
         open:false,
         state:{},

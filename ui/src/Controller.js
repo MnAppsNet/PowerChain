@@ -33,9 +33,12 @@ class Controller {
     get sessions() { return this.view.state.sessions; }
     get storageUnitInfo() { return this.view.state.storageUnitInfo; }
     get totalENT() { return this.view.state.totalENT; }
+    get totalEeuro() { return this.view.state.totalEeuro; }
     get mintRate() { return this.view.state.mintRate; }
     get burnRate() { return this.view.state.burnRate; }
     get popup() { return this.view.state.popup; }
+    get bankerAddress() { return this.view.state.bankerAddress }
+    get networkParameters() { return this.view.state.networkParameters }
 
     //Setters >>>>>
     set styles(v) { this.view.setState({ styles: v }); }
@@ -48,6 +51,11 @@ class Controller {
     set balance(v) { this.view.setState({ balance: v }); }
     set lockedBalance(v) { this.view.setState({ lockedBalance: v }); }
     set totalEnergy(v) { this.view.setState({ totalEnergy: v }); }
+    set totalEeuro(v) { this.view.setState({totalEeuro: v}); }
+    set bankerAddress(v) { 
+        this.view.setState({bankerAddress: (this.fromBigNumber(v) === 0)?this.strings.noBanker:v});
+    }
+    set networkParameters(v) { this.view.setState({networkParameters: v}); }
     set web3(v) {
         if (v != null) v.config.handleRevert = true;
         this.view.setState({ web3: v });
@@ -164,11 +172,11 @@ class Controller {
                 results.forEach((item) => {
                     const session = item["sessionId"];
                     const kwh = Number(item["wh"]) / 1000;
-                    const timestamp = item["timestamp"];
+                    const timestamp = (new Date(Number(item["timestamp"]) * 1000)).toLocaleString();
                     const unit = item["unit"];
                     if (session !== "") {
                         sessions.push({
-                            label: timestamp + ">> " + this.strings.storageUnit + ": " + unit,
+                            label: timestamp + " >> " + this.strings.storageUnit + ": " + unit,
                             value: kwh + " kWh",
                         })
                     }
@@ -276,6 +284,39 @@ class Controller {
         }, transferMethod, account, this.toBiglNumber(amount))
     }
 
+    //Banker >>>>>
+    async getTotalEeuro() {
+        this.model.executeViewMethod((results) => {
+            this.totalEeuro = this.fromBigNumber(results);
+        }, Blockchain.METHODS.GET_TOTAL_EEURO);
+    }
+    async getBankerAddress() {
+        this.model.executeViewMethod((results) => {
+            this.bankerAddress = results;
+        }, Blockchain.METHODS.GET_BANKER_ADDRESS);
+    }
+    async changeBanker() {
+        // !!!!!!!
+        this.model.executeModifyStateMethod((_) => {
+            this.getBalance();
+        }, Blockchain.METHODS.SET_BANKER_ADDRESS)
+    }
+
+    //Network >>>>>
+    async getNetworkParameters() {
+        this.model.executeViewMethod((results) => {
+            const params = {};
+            for (let param of Object.keys(results)) {
+                if (isNaN(param)){
+                    params[param] = this.fromBigNumber(results[param]);
+                    if (params[param] < 0.00001){
+                        params[param] = params[param] * 10**18;
+                    }
+                }
+            }
+            this.networkParameters = params;
+        }, Blockchain.METHODS.GET_NETWORK_PARAMETERS);
+    }
     //Other >>>>>
     toBiglNumber(number){
         return Web3.utils.toWei(number,"ether")

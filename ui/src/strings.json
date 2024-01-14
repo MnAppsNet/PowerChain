@@ -47,7 +47,17 @@
         "metamaskError":"A MetaMask error occured",
         "burnAmount":"ENT amount to burn",
         "startSession":"Start Consumption Session",
-        "consumeEnergy":"Consume Energy"
+        "consumeEnergy":"Consume Energy",
+        "networkInfo":"Network Info",
+        "banker":"Banker",
+        "totalEeuro":"eEuro in circulation",
+        "parameters":"Network Parameters",
+        "noBanker":"Banker is not set...",
+        "parameterMDescription":"ENT/kWh - Minimum minting rate",
+        "parameterBDescription":"ENT/kWh - Maximum burning rate",
+        "parameterCDescription":"% - Missing energy cover rate",
+        "parameterHDescription":"S - Amount of time to keep consumsion session active",
+        "parameterFDescription":"% - Percentage of the produced ENT for the storage provider fee"
     },
     "GR":{
         "connect":"Σύνδεση με MetaMask",

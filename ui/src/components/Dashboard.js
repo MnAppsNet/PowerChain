@@ -8,12 +8,14 @@ import {
     FiHome,
     FiWind,
     FiUsers,
-    FiRefreshCw
+    FiRefreshCw,
+    FiInfo,
 } from 'react-icons/fi'
 import {
     Box,
     Button
 } from '@chakra-ui/react'
+import Network from "./pages/Network.js";
 
 const SpinAnimation = (props) =>{
     const animationTime = props.time;
@@ -35,6 +37,7 @@ const Dashboard = (props) => {
         static Tokens = 1;
         static Energy = 2;
         static Voting = 3;
+        static Network = 4;
     }
     const controller = props.controller;
 
@@ -46,10 +49,13 @@ const Dashboard = (props) => {
             name: controller.strings.tokens, icon: FiHome, action: () => {
                 setSection(Sections.Tokens);
             }
-        },
-        {
+        }, {
             name: controller.strings.energy, icon: FiWind, action: () => {
                 setSection(Sections.Energy);
+            }
+        }, {
+            name: controller.strings.networkInfo, icon: FiInfo, action: () => {
+                setSection(Sections.Network);
             }
         },
     ]
@@ -76,6 +82,11 @@ const Dashboard = (props) => {
             case Sections.Voting:
                 controller.getVotes(controller.address);
                 break;
+            case Sections.Network:
+                controller.getTotalEeuro();
+                controller.getBankerAddress();
+                controller.getNetworkParameters();
+                break;
             default:
                 break;
         }
@@ -98,11 +109,13 @@ const Dashboard = (props) => {
     const renderSection = () =>{
             switch(section) {
               case Sections.Tokens:
-                return (<Tokens controller={controller} />);
-            case Sections.Energy:
-                return (<Energy controller={controller} />);
-            case Sections.Voting:
-                return (<Voting controller={controller} />);
+                    return (<Tokens controller={controller} />);
+                case Sections.Energy:
+                    return (<Energy controller={controller} />);
+                case Sections.Voting:
+                    return (<Voting controller={controller} />);
+                case Sections.Network:
+                    return (<Network controller={controller} />);
               default:
                 return ("");
             }
