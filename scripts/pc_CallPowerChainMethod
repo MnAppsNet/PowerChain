@@ -1,0 +1,83 @@
+#!/usr/bin/python3
+import argparse, os, json, time
+from solcx import compile_source, install_solc
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
+from pprint import pprint;
+
+SOLC_VERSION="0.8.20"
+install_solc(SOLC_VERSION)
+
+class PowerChain:
+    def __init__(self,rpc,pwc) -> None:
+        self.w3 = Web3(Web3.HTTPProvider(rpc))
+        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+        #Load contract JSON and address key
+        if (not os.path.exists(pwc)):
+            exit("PowerChain Contract JSON file not valid")
+        key = ""
+        if (os.path.exists(os.path.dirname(__file__)+"/account.key")):
+            with open(os.path.dirname(__file__)+"/account.key", "r") as file:
+                key = file.read()
+        if (key != ""):
+            self.account = self.w3.eth.account.from_key(key)
+        else:
+            self.account = self.w3.eth.account.create()
+            with open(os.path.dirname(__file__)+"/account.key", "w") as file:
+                file.write(self.account.key.hex())
+        with open(pwc) as file:
+            contractJson = json.load(file)
+        self.contract = self.w3.eth.contract(abi=contractJson['abi'], address=contractJson['address'])
+    
+    def call(self,method,*args):
+        return self.contract.functions[method](*args).call(
+                    {"from": self.account.address,
+                    "gasPrice":0,
+                    "nonce":self.w3.eth.get_transaction_count(self.account.address)
+                })
+    
+    def execute(self,method,*args):
+        tr = self.contract.functions[method](*args).build_transaction(
+                    {"from": self.account.address,
+                    "gasPrice":0,
+                    "nonce":self.w3.eth.get_transaction_count(self.account.address)
+                })
+        signed_tr = self.account.sign_transaction(tr)
+        tx_hash = self.w3.eth.send_raw_transaction(signed_tr.rawTransaction)
+        tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
+        try:
+            reason = tx_receipt.logs[0].data.decode().replace("\x00","")
+            return reason
+        except:
+            return ""
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Deploy Smart Contract')
+    parser.add_argument('rpc', type=str, default="http://localhost:32301",
+                        help='Blockchain network RPC')
+    parser.add_argument('pwc', type=str,
+                        help='PowerChain Contract JSON File')
+    parser.add_argument('method', type=str, default="",
+                        help='PowerChain contract method')
+    parser.add_argument('arguments', type=list, default="",
+                        help='Arguments of PowerChain method')
+    parser.add_argument('--call', type=bool, default=False, action=argparse.BooleanOptionalAction,
+                        help='Call view PowerChain method')
+    try:
+        args = parser.parse_args()
+    except:
+        parser.print_help()
+        exit(0)
+    pc = PowerChain(args.rpc,args.pwc)
+
+    if (args.call):
+        results = pc.call(args.method,*args.arguments)
+        pprint(results)
+    else:
+        results = pc.execute(args.method,*args.arguments)
+        if (results == ""):
+            pprint(f"Method {args.method} executed successfully")
+        else:
+            pprint(results)

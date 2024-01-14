@@ -8,3 +8,4 @@ besu
 /ui/src/addresses.json
 /ui/src/contracts/*.json
 /storage_unit_scripts/account.key
+/scripts/account.key

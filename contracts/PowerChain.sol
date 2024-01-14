@@ -36,7 +36,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function getStorageUnitEnergy(
         address unit
     ) external returns (uint256 unitEnergy) {
@@ -47,7 +46,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function getTotalEnergy() external returns (uint256 wh) {
         try _energy.getTotalEnergy() returns (uint256 totalWh) {
             return totalWh;
@@ -75,7 +73,6 @@ contract PowerChain {
             }
         }
     }
-
     function removeStorageUnit(address unit) external {
         if (!_energy.getStorageUnitState(unit)) {
             emit Error("Storage unit is not active...");
@@ -90,7 +87,6 @@ contract PowerChain {
             }
         }
     }
-
     function startConsumptionSession(
         address storageUnit,
         uint256 entAmmount
@@ -112,11 +108,9 @@ contract PowerChain {
     function getUserConsumptionSessions(address addr) external view returns (Energy.UserConsumptionSession[] memory userSessions){
         return _energy.getUserConsumptionSessions(addr);
     }
-
     function getStorageUnitsInfo() external view returns (Energy.StorageUnitInfo[] memory){
         return _energy.getStorageUnitsInfo();
     }
-
     function getConsumptionSessionEnergy(
         address addr
     ) external returns (uint256 sessionWh) {
@@ -151,7 +145,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function energyConsumed(address consumer, uint wh) external {
         if (!_energy.getStorageUnitState(msg.sender)) {
             emit Error("Method can be called only by active storage units");
@@ -163,19 +156,16 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function clearOldSessions() external {
         try _energy.clearOldSessions() {} catch Error(string memory reason) {
             emit Error(reason);
         }
     }
-
     //-------------------------------------------------------------------------------
     //Parameters >>>>>>>
     function getParameters() external view returns(uint256 M, uint256 B, uint256 C, uint256 H, uint256 F) {
         return (_parameters.M(),_parameters.B(),_parameters.C(),_parameters.H(),_parameters.F() );
     }
-
     //-------------------------------------------------------------------------------
     //Banker >>>>>>>
     function changeBanker(address addr) external {
@@ -208,7 +198,6 @@ contract PowerChain {
     function getTotalEeuro() external view returns (uint256){
         return _banker.getTotalEeuro();
     }
-
     //-------------------------------------------------------------------------------
     //Token >>>>>>>
     function transferENT(address to, uint256 amnt) external {
@@ -222,7 +211,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function balanceENT() external returns (uint256 available, uint256 locked) {
         try _energy.energyTokenBalance(msg.sender) returns (
             uint256 avail,
@@ -233,7 +221,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function transfereEuro(address to, uint256 amnt) external {
         try
             _banker.transfereEuro(msg.sender, to, amnt)
@@ -241,7 +228,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function lockeEuro(uint256 amnt) external {
         try _banker.lockeEuro(msg.sender, amnt) {} catch Error(
             string memory reason
@@ -249,7 +235,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function balanceeEuro()
         external
         returns (uint256 available, uint256 locked)
@@ -263,7 +248,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function entAddress() external returns (address addr) {
         try _energy.getENTAddress() returns (address entAddr) {
             return entAddr;
@@ -271,7 +255,6 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-
     function eEuroAddress() external returns (address addr) {
         try _banker.getEeuroAddress() returns (address eEuroAddr) {
             return eEuroAddr;
@@ -286,7 +269,6 @@ contract PowerChain {
             emit Error((reason));
         }
     }
-
     //-------------------------------------------------------------------------------
     //Voting >>>>>>>
     function isVoter() external view returns (bool voter) {
