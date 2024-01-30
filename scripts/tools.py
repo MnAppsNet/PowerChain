@@ -3,6 +3,7 @@ from solcx import compile_source, install_solc
 from pprint import pprint
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
+from web3 import Account
 
 SOLC_VERSION="0.8.20"
 EVM_VERSION="paris"
@@ -18,7 +19,7 @@ def sendEth(icp,account,amount):
     tx =  w3.eth.get_transaction(tx_hash)
     pprint(tx)
 
-def deployContract(rpc,path):
+def deployContract(rpc,path,account:Account=None):
 
     install_solc(SOLC_VERSION)
 
@@ -47,15 +48,23 @@ def deployContract(rpc,path):
         raise Exception("No contract found")
 
     #Deploy Contract
-    w3.eth.default_account = w3.eth.accounts[0]
     contract = w3.eth.contract(abi=abi, bytecode=bytecode)
-    tx_hash = contract.constructor().transact({"gasPrice":0})
+    if account == None:
+        w3.eth.default_account = w3.eth.accounts[0]
+        tx_hash = contract.constructor().transact({"gasPrice":0})
+    else:
+        signed_tx = account.sign_transaction(
+            (contract.constructor().build_transaction({
+                "from": account.address,
+                "gasPrice":0,
+                "nonce":w3.eth.get_transaction_count(account.address)})))
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
     contract = {
         "name":main_contract,
         "address":tx_receipt.contractAddress,
-        "abi":abi
-    }
+        "abi":abi }
     print("Smart Contract Deployed!")
     print(f"Contract Address: {tx_receipt.contractAddress}")
     pprint(abi)

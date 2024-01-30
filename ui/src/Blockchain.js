@@ -34,7 +34,7 @@ export class Blockchain {
         ADD_STORAGE_UNIT: "registerStorageUnit",
         REMOVE_STORAGE_UNIT: "removeStorageUnit",
         START_CONSUMPTION_SESSION: "startConsumptionSession",
-        GET_CONSUMPTION_SESSIONS: "getUserConsumptionSessions",
+        GET_CONSUMPTION_SESSIONS: "getConsumptionSessions",
         GET_STORAGE_UNIT_INFO: "getStorageUnitsInfo",
         SET_BANKER_ADDRESS: "changeBanker",
     }

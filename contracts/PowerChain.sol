@@ -7,6 +7,7 @@ import "./includes/Voters.sol";
 import "./includes/Tools.sol";
 import "./includes/Energy.sol";
 import "./includes/Banker.sol";
+import "./includes/Storage.sol";
 import "./includes/Parameters.sol";
 
 contract PowerChain {
@@ -36,9 +37,7 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-    function getStorageUnitEnergy(
-        address unit
-    ) external returns (uint256 unitEnergy) {
+    function getStorageUnitEnergy(address unit) external returns (uint256 unitEnergy) {
         //Returns storage unit energy in wh
         try _energy.getAvailableEnergy(unit) returns (uint256 energy) {
             return energy;
@@ -105,10 +104,10 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-    function getUserConsumptionSessions(address addr) external view returns (Energy.UserConsumptionSession[] memory userSessions){
-        return _energy.getUserConsumptionSessions(addr);
+    function getConsumptionSessions() external view returns (Energy.UserConsumptionSession[] memory userSessions){
+        return _energy.getConsumptionSessions(msg.sender);
     }
-    function getStorageUnitsInfo() external view returns (Energy.StorageUnitInfo[] memory){
+    function getStorageUnitsInfo() external view returns (Storage.StorageUnitInfo[] memory){
         return _energy.getStorageUnitsInfo();
     }
     function getConsumptionSessionEnergy(
@@ -126,7 +125,7 @@ contract PowerChain {
             unit = msg.sender;
             consumer = addr;
         }
-        try _energy.getConsumptionSessionEnergy(msg.sender, addr) returns (
+        try _energy.getConsumptionSessionEnergy(unit, consumer) returns (
             uint256 wh
         ) {
             return wh;
@@ -135,10 +134,6 @@ contract PowerChain {
         }
     }
     function energyProduced(address producer, uint256 wh) external {
-        if (!_energy.getStorageUnitState(msg.sender)) {
-            emit Error("Method can be called only by active storage units");
-            return;
-        }
         try _energy.produce(msg.sender, producer, wh) {} catch Error(
             string memory reason
         ) {
@@ -146,10 +141,6 @@ contract PowerChain {
         }
     }
     function energyConsumed(address consumer, uint wh) external {
-        if (!_energy.getStorageUnitState(msg.sender)) {
-            emit Error("Method can be called only by active storage units");
-            return;
-        }
         try _energy.consume(msg.sender, consumer, wh) {} catch Error(
             string memory reason
         ) {
@@ -161,10 +152,26 @@ contract PowerChain {
             emit Error(reason);
         }
     }
+    function reportActualEnergy(uint256 actualEnergy) external {
+        //Report the actual stored energy in an energy unit
+        try _energy.balanceStorageUnitEnergy(msg.sender,actualEnergy) {} catch Error(string memory reason) {
+            emit Error(reason);
+        }
+    } 
     //-------------------------------------------------------------------------------
     //Parameters >>>>>>>
     function getParameters() external view returns(uint256 M, uint256 B, uint256 C, uint256 H, uint256 F) {
         return (_parameters.M(),_parameters.B(),_parameters.C(),_parameters.H(),_parameters.F() );
+    }
+    function setParameter(string memory param,uint256 value) external {
+        string memory voteString = _tools.concat(_tools.concat( _tools.concat("setParameter_", param), "_" ),value);
+        if (startVote(voteString)) {
+            try _banker.changeBanker(addr) {
+                emit Info(_tools.concat("Banker changed to >> ", addr));
+            } catch Error(string memory reason) {
+                emit Error(reason);
+            }
+        }
     }
     //-------------------------------------------------------------------------------
     //Banker >>>>>>>
@@ -282,42 +289,21 @@ contract PowerChain {
         }
     }
     function startVote(string memory voteString) internal returns (bool votePassed) {
-        if (!_Voters.isVoter(msg.sender)) {
-            emit Error("Not authorized to execute this method");
-            return false;
-        }
-        //Avoid using vote strings that has been already passed in the past
-        bool passed = _Voters.isVotePassed(voteString);
-        string memory availableVoteString = voteString;
-        uint256 i = 1;
-        while (passed){
-            availableVoteString = 
-                _tools.concat(voteString, 
-                    _tools.concat("_",
-                        _tools.uint2str(i)));
-            passed = _Voters.isVotePassed(availableVoteString);
-            i += 1;
-        }
-        int vote = 0;
-        try _Voters.changeVote(msg.sender, availableVoteString) returns (int v) {
-            vote = v;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-            return false;
-        }
-        emit Info(
-            (vote == 1)
+        try _Voters.startVote(msg.sender,voteString) returns (int vote) {
+            if (vote == 2){
+                //Vote Passed
+                return true;
+            }
+            emit Info((vote == 1)
                 ? _tools.concat(
-                    _tools.concat("You are in favor of: '", availableVoteString),
+                    _tools.concat("You are in favor of: '", voteString),
                     "'. Execute the method again to change your mind."
                 )
                 : _tools.concat(
-                    _tools.concat("You are against of: '", availableVoteString),
+                    _tools.concat("You are against of: '", voteString),
                     "'. Execute the method again to change your mind"
-                )
-        );
-        try _Voters.isVotePassed(availableVoteString) returns (bool passedVote) {
-            return passedVote;
+                ));
+            return false;
         } catch Error(string memory reason) {
             emit Error(reason);
             return false;

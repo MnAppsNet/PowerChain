@@ -13,13 +13,13 @@ parser.add_argument('pwc', type=str,
                     help='PowerChain Contract JSON File')
 parser.add_argument('addr', type=str, default="",
                     help='Consumer/Producer address')
-parser.add_argument('whs', type=str, default=0,
+parser.add_argument('whs', type=int, default=0,
                     help='Energy produces or consumed in watt hours (wh)')
-parser.add_argument('consume', type=bool, default=False,
+parser.add_argument('--consume', type=bool, action=argparse.BooleanOptionalAction, default=False,
                     help='Energy consumed')
-parser.add_argument('produce', type=bool, default=False,
+parser.add_argument('--produce', type=bool, action=argparse.BooleanOptionalAction, default=False,
                     help='Energy produced')
-parser.add_argument('sessionEnergy', type=bool, default=False,
+parser.add_argument('--sessionEnergy', type=bool, action=argparse.BooleanOptionalAction , default=False,
                     help='Get consumption session energy')
 try:
     args = parser.parse_args()
@@ -52,9 +52,9 @@ with open(args.pwc) as file:
 contract = w3.eth.contract(abi=contractJson['abi'], address=contractJson['address'])
 
 chainFunction = ""
-if (args.consume): chainFunction = "energyProduced"
+if (args.consume): chainFunction = "energyConsumed"
 elif (args.produce): chainFunction = "energyProduced"
-elif (args.sessionEnergy): chainFunction = "sessionEnergy"
+elif (args.sessionEnergy): chainFunction = "getConsumptionSessionEnergy"
 else: exit("Please use --consume or --produce to define which action you need to perform")
 
 if (args.sessionEnergy):
@@ -81,6 +81,6 @@ try:
     exit(reason)
 except:
     text = ""
-    if (args.produced): text = "produced"
-    elif (args.consumed): text = "consumed"
+    if (args.produce): text = "produced"
+    elif (args.consume): text = "consumed"
     print(f"{args.whs} wh {text}")

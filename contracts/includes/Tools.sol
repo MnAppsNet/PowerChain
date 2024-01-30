@@ -21,29 +21,27 @@ contract Tools {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
     }
-
     function concat(
         string memory a,
         address b
     ) public pure returns (string memory) {
         return concat(a, toAsciiString(b));
     }
-
     function concat(address a, address b) public pure returns (string memory) {
         return concat(toAsciiString(a), toAsciiString(b));
     }
 
-    function concat(
-        string memory a,
-        string memory b
+    function concat(string memory a, string memory b
     ) public pure returns (string memory) {
         return string(abi.encodePacked(a, b));
     }
 
-    function equal(
-        string memory a,
-        string memory b
-    ) public pure returns (bool) {
+    function concat(string memory a, uint256 b
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(a, b));
+    }
+
+    function equal( string memory a, string memory b ) public pure returns (bool) {
         return (keccak256(abi.encodePacked(a)) ==
             keccak256(abi.encodePacked(b)));
     }

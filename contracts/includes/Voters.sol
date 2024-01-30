@@ -49,6 +49,27 @@ contract Voters{
     }
 
     //>>>> Voting system
+    function startVote(address addr, string memory voteString) public returns (int) {
+        require(msg.sender == _owner);
+        require(isVoter(addr),"Not authorized to execute this method");
+        //Avoid using vote strings that has been already passed in the past
+        bool passed = isVotePassed(voteString);
+        string memory availableVoteString = voteString;
+        uint256 i = 1;
+        while (passed){
+            availableVoteString = 
+                _tools.concat(voteString, 
+                    _tools.concat("_",
+                        _tools.uint2str(i)));
+            passed = isVotePassed(availableVoteString);
+            i += 1;
+        }
+        int vote = changeVote(addr, availableVoteString);
+        if (isVotePassed(availableVoteString)){
+            vote = 2; //Vote passed
+        }
+        return vote;
+    }
     function getVotes(address addr) public returns(UserInfo[] memory){
         require(msg.sender == _owner,"Not allowed to execute this method");
         require(_voters[addr],"You are not a voter");
@@ -58,7 +79,7 @@ contract Voters{
         return _userVoteStrings[addr]; 
     }
     function checkIfVoteIsPassed(uint count) internal view returns(bool){
-        return ( (count / _VotersNumber)*10 > 5);
+        return ( (count*10 / _VotersNumber) > 5);
     }
     function changeVote(address addr, string memory vote) public returns (int){
         require(_voters[addr],"Not allowed to execute this method");

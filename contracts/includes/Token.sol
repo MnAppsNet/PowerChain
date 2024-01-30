@@ -60,6 +60,7 @@ contract Token{
         require(msg.sender == _owner, "You are not allowed to execute this method");
         if (_balances[addr].lockedFrom[contractor] < amnt)
             amnt = _balances[addr].lockedFrom[contractor]; //Unlock full amount
+        if (amnt == 0) return;
         _balances[addr].locked -= amnt;
         _balances[addr].lockedFrom[contractor] -= amnt;
         _balances[addr].available += amnt;
@@ -70,5 +71,4 @@ contract Token{
         _balances[from].available -= amnt;
         _balances[to].available += amnt;
     }
-
 }

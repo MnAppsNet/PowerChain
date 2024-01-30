@@ -9,10 +9,14 @@ contract Parameters {
     address _owner;
     uint256 public M; //Minimum minting rate
     uint256 public B; //Maximum burning rate
-    uint256 public C; //Missing energy cover rate
+    uint256 public C; //Missing energy recover rate
     uint256 public H; //Hours to keep consumsion session active
     uint256 public F; //Storage provider fee (amount of ent for storage provider cut)
+    enum parameters{ M, B, C, H, F }
+    string[] parameterStrings;
+
     constructor( Tools tools){
+        parameterStrings = ['M','B','C','H','F'];
         //Default values
         _tools = tools;
         _owner = msg.sender;
@@ -21,6 +25,14 @@ contract Parameters {
         C = 1 * _tools.multiplier() / 10;  //10%
         H = 2 hours;
         F = 2 * _tools.multiplier() / 10;  //20%
+    }
+    function isValidParam(string memory param) view public returns(bool){
+        uint length = parameterStrings.length;
+        for(uint i = 0; i < length; i++){
+            if (_tools.equal(parameterStrings[i], param))
+                return true;
+        }
+        return false;
     }
     function setM(uint256 m) public {
         require(_owner == msg.sender,"You are not allowed to change contract parameters");

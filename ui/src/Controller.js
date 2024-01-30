@@ -165,7 +165,6 @@ class Controller {
         );
     }
     async getConsumptionSessions() {
-        const address = this.address;
         this.model.executeViewMethod(
             (results) => {
                 const sessions = []
@@ -187,7 +186,7 @@ class Controller {
                     })
                 }
                 this.sessions = sessions;
-            }, Blockchain.METHODS.GET_CONSUMPTION_SESSIONS, address)
+            }, Blockchain.METHODS.GET_CONSUMPTION_SESSIONS)
     }
     async getStorageUnitsInfo() {
         this.model.executeViewMethod(

@@ -30,20 +30,25 @@ class PowerChain:
             contractJson = json.load(file)
         self.contract = self.w3.eth.contract(abi=contractJson['abi'], address=contractJson['address'])
     
-    def call(self,method,*args):
+    def call(self,method,*args,account=None):
+        address = self.account.address
+        if ( account != None ): address = account.address
         return self.contract.functions[method](*args).call(
-                    {"from": self.account.address,
-                    "gasPrice":0,
-                    "nonce":self.w3.eth.get_transaction_count(self.account.address)
-                })
+                    {"from": address,
+                    "gasPrice":0 })
     
-    def execute(self,method,*args):
+    def execute(self,method,*args,account=None):
+        address = self.account.address
+        if ( account != None ): address = account.address
         tr = self.contract.functions[method](*args).build_transaction(
-                    {"from": self.account.address,
+                    {"from": address,
                     "gasPrice":0,
-                    "nonce":self.w3.eth.get_transaction_count(self.account.address)
+                    "nonce":self.w3.eth.get_transaction_count(address)
                 })
-        signed_tr = self.account.sign_transaction(tr)
+        if account != None:
+            signed_tr = account.sign_transaction(tr)
+        else:
+            signed_tr = self.account.sign_transaction(tr)
         tx_hash = self.w3.eth.send_raw_transaction(signed_tr.rawTransaction)
         tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
         try:
