@@ -9,23 +9,35 @@ import "./includes/Energy.sol";
 import "./includes/Banker.sol";
 import "./includes/Storage.sol";
 import "./includes/Parameters.sol";
+import "./includes/Trade.sol";
 
 contract PowerChain {
     event Error(string error);
     event Info(string info);
-
+    
+    Token internal _ENT;
+    Token internal _eEuro;
     Voters internal _Voters;
     Energy internal _energy;
     Parameters internal _parameters;
     Banker internal _banker;
     Tools internal _tools;
+    Trade internal _trade;
 
     constructor() {
         _tools = new Tools();
-        _banker = new Banker(_tools);
+        _ENT = new Token("ENT");
+        _eEuro = new Token("eEuro");
+        _energy = new Energy(_parameters,_tools,_ENT);
+        _banker = new Banker(_eEuro, _tools);
         _parameters = new Parameters(_tools);
         _Voters = new Voters(msg.sender,_tools);
-        _energy = new Energy(_parameters,_tools);
+        _trade = new Trade(_ENT,_eEuro,_tools);
+        //Set authorizations :
+        _ENT.addOwner(address(_energy));
+        _ENT.addOwner(address(_trade));
+        _eEuro.addOwner(address(_banker));
+        _eEuro.addOwner(address(_trade));
     }
 
     //-------------------------------------------------------------------------------
@@ -164,10 +176,14 @@ contract PowerChain {
         return (_parameters.M(),_parameters.B(),_parameters.C(),_parameters.H(),_parameters.F() );
     }
     function setParameter(string memory param,uint256 value) external {
+        if (!_parameters.isValidParam(param)){
+            emit Error(_tools.concat("Given param is not valid >>",param));
+            return;
+        }
         string memory voteString = _tools.concat(_tools.concat( _tools.concat("setParameter_", param), "_" ),value);
         if (startVote(voteString)) {
-            try _banker.changeBanker(addr) {
-                emit Info(_tools.concat("Banker changed to >> ", addr));
+            try _parameters.setParameter(param,value) {
+                emit Info(_tools.concat(_tools.concat("Parameter ", param, " set to "),value));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
@@ -203,13 +219,13 @@ contract PowerChain {
         return _banker.getBanker();
     }
     function getTotalEeuro() external view returns (uint256){
-        return _banker.getTotalEeuro();
+        return _eEuro.total();
     }
     //-------------------------------------------------------------------------------
     //Token >>>>>>>
     function transferENT(address to, uint256 amnt) external {
         try
-            _energy.transferEnergyTokens(
+            _ENT.transfer(
                 msg.sender,
                 to,
                 amnt
@@ -219,7 +235,7 @@ contract PowerChain {
         }
     }
     function balanceENT() external returns (uint256 available, uint256 locked) {
-        try _energy.energyTokenBalance(msg.sender) returns (
+        try _ENT.totalBalance(msg.sender) returns (
             uint256 avail,
             uint256 lock
         ) {
@@ -230,7 +246,7 @@ contract PowerChain {
     }
     function transfereEuro(address to, uint256 amnt) external {
         try
-            _banker.transfereEuro(msg.sender, to, amnt)
+            _eEuro.transfer(msg.sender, to, amnt)
         {} catch Error(string memory reason) {
             emit Error(reason);
         }
@@ -246,7 +262,7 @@ contract PowerChain {
         external
         returns (uint256 available, uint256 locked)
     {
-        try _banker.eEuroBalance(msg.sender) returns (
+        try _eEuro.totalBalance(msg.sender) returns (
             uint256 avail,
             uint256 lock
         ) {
@@ -255,22 +271,8 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-    function entAddress() external returns (address addr) {
-        try _energy.getENTAddress() returns (address entAddr) {
-            return entAddr;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
-    }
-    function eEuroAddress() external returns (address addr) {
-        try _banker.getEeuroAddress() returns (address eEuroAddr) {
-            return eEuroAddr;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
-    }
     function getTotalENT() external returns (uint256 amnt){
-        try _energy.getTotalENT() returns(uint256 ent){
+        try _eEuro.total() returns(uint256 ent){
             return ent;
         } catch Error(string memory reason){
             emit Error((reason));

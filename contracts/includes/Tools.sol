@@ -16,15 +16,17 @@ contract Tools {
         }
         return string(s);
     }
-
+    function min(uint256 a, uint256 b) public pure returns (uint256) {
+        return a < b ? a : b;
+    }
     function char(bytes1 b) internal pure returns (bytes1 c) {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
     }
-    function concat(
-        string memory a,
-        address b
-    ) public pure returns (string memory) {
+    function concat(string memory a, string memory b, string memory c) public pure returns (string memory) {
+        return concat(concat(a, b),c);
+    }
+    function concat(string memory a, address b) public pure returns (string memory) {
         return concat(a, toAsciiString(b));
     }
     function concat(address a, address b) public pure returns (string memory) {

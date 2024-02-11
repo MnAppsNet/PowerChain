@@ -7,49 +7,36 @@ import "./Tools.sol";
 
 contract Banker{
     Token internal _eEuro;
-    address private _owner;
+    mapping(address=>bool) private _owners;
     address _banker;
     Tools _tools;
-    constructor( Tools tools ) {
+    constructor( Token eEuro, Tools tools ) {
         _tools = tools;
-        _owner = msg.sender;
-        _eEuro = new Token("eEuro");
+        _owners[msg.sender] = true;
+        _eEuro = eEuro;
         _banker = address(0); //No banker initially
     }
     function getBanker() public view returns(address){
         return _banker;
     }
     function changeBanker(address addr) public{
-        require(msg.sender == _owner,"You are not authorized to execute this method");
+        require(_owners[msg.sender],"You are not authorized to execute this method");
         _banker = addr;
     }
-    function getEeuroAddress() public view returns(address token){
-        return address(_eEuro);
-    }
-    function eEuroBalance(address addr) public view returns(uint256 available,uint256 locked){
-        return (_eEuro.balance(addr),_eEuro.lockedBalance(addr));
-    }
-    function getTotalEeuro() public view returns(uint256){
-        return _eEuro.total();
-    }
-    function transfereEuro(address from, address to, uint256 amnt) public {
-        require(msg.sender == _owner,"You are not authorized to execute this method");
-        _eEuro.transfer(from, to, amnt);
-    }
     function minteEuro(address bnk, address addr, uint256 amnt) public {
-        require(msg.sender == _owner,"You are not authorized to execute this method");
+        require(_owners[msg.sender],"You are not authorized to execute this method");
         require(bnk == _banker, "Only banker can mint eEuro");
         _eEuro.mint(addr, amnt);
     }
     function burnLockedeEuro(address addr, uint256 amnt) public {
-        require(msg.sender == _owner,"You are not authorized to execute this method");
+        require(_owners[msg.sender],"You are not authorized to execute this method");
         require(addr == _banker, "Only banker can burn locked eEuro");
         require(_eEuro.balanceLockedFromContractor(addr, _banker) > amnt, "Not enough locked eEuro");
         _eEuro.unlockAmmount(addr, _banker, amnt);
         _eEuro.burn(addr, amnt);
     }
     function lockeEuro(address addr, uint256 amnt) public{
-        require(msg.sender == _owner,"You are not authorized to execute this method");
+        require(_owners[msg.sender],"You are not authorized to execute this method");
         _eEuro.lockAmmount(addr, _banker, amnt);
     }
 

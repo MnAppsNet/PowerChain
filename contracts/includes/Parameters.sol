@@ -12,7 +12,6 @@ contract Parameters {
     uint256 public C; //Missing energy recover rate
     uint256 public H; //Hours to keep consumsion session active
     uint256 public F; //Storage provider fee (amount of ent for storage provider cut)
-    enum parameters{ M, B, C, H, F }
     string[] parameterStrings;
 
     constructor( Tools tools){
@@ -20,7 +19,7 @@ contract Parameters {
         //Default values
         _tools = tools;
         _owner = msg.sender;
-        M = 1 * _tools.multiplier() / 100; //01%
+        M = 1 * _tools.multiplier() / 100; //0.1
         B = 3 * _tools.multiplier();
         C = 1 * _tools.multiplier() / 10;  //10%
         H = 2 hours;
@@ -33,6 +32,24 @@ contract Parameters {
                 return true;
         }
         return false;
+    }
+    function setParameter(string memory param,uint256 value) public {
+        require(_owner == msg.sender,"You are not allowed to change contract parameters");
+        if (_tools.equal(param, parameterStrings[0])){ //Set M
+            setM(value);
+        }
+        else if (_tools.equal(param, parameterStrings[1])){ //Set B
+            setB(value);
+        }
+        else if (_tools.equal(param, parameterStrings[2])){ //Set C
+            setC(value);
+        }
+        else if (_tools.equal(param, parameterStrings[3])){ //Set H
+            setH(value);
+        }
+        else if (_tools.equal(param, parameterStrings[4])){ //Set F
+            setF(value);
+        }
     }
     function setM(uint256 m) public {
         require(_owner == msg.sender,"You are not allowed to change contract parameters");

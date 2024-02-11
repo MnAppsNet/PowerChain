@@ -8,10 +8,10 @@ import "./Parameters.sol";
 import "./Storage.sol";
 
 contract Energy {
-    Token internal _ENT;
     Parameters internal _parameters;
     Tools internal _tools;
     Storage internal _storage;
+    Token internal _ENT;
 
     struct WH {
         uint256 available;
@@ -32,29 +32,29 @@ contract Energy {
         uint256 timestamp;
         address unit;
     }
-    address private _owner;
+    mapping(address => bool) private _owners;
     string[] internal _consumptionSessions;
     mapping(address => string[]) internal _userConsumptionSessions;
     mapping(address => mapping(string => bool))
         internal _userConsumptionSessionExists;
     mapping(string => ConsumptionSession) internal _activeSessions;
 
-    constructor(Parameters params, Tools tools) {
+    constructor(Parameters params, Tools tools, Token ent) {
         _tools = tools;
+        _ENT = ent;
         _parameters = params;
-        _owner = msg.sender;
-        _ENT = new Token("ENT");
+        _owners[msg.sender] = true;
         _storage = new Storage(this);
     }
 
     // Handle storage units >>>>>>>
     function registerUnit(address addr, address owner) public {
-        require(msg.sender == _owner, "Not authorized to register new unit");
+        require(_owners[msg.sender], "Not authorized to register new unit");
         _storage.registerUnit(addr,owner);
     }
 
     function disableStorageUnit(address addr) public {
-        require(msg.sender == _owner, "Not authorized to diable storage units");
+        require(_owners[msg.sender], "Not authorized to diable storage units");
         _storage.disableStorageUnit(addr);
         clearOldSessions(); //Remove sessions that are not valid anymore
     }
@@ -113,7 +113,7 @@ contract Energy {
     }
 
     function startConsumption(address unit, address consumer, uint256 entAmmount) public returns (string memory) {
-        require(msg.sender == _owner, "Not authorized to start a consumption session");
+        require(_owners[msg.sender], "Not authorized to start a consumption session");
         require(_ENT.balance(consumer) >= entAmmount, "Not enough ENT tokens");
         require(_storage.state(unit), "Storage Unit is disabled");
         require(_storage.totalNetworkEnergy() > 0, "No energy available");
@@ -149,7 +149,7 @@ contract Energy {
     }
 
     function getConsumptionSessionEnergy(address unit, address consumer) public view returns (uint256) {
-        require( msg.sender == _owner, "You are not authorized to execute this method" );
+        require(_owners[msg.sender], "You are not authorized to execute this method" );
         require(_storage.state(unit), "Storage unit not active");
         string memory consumptionSessionID = getConsumptionSessionID(
             unit,
@@ -159,7 +159,7 @@ contract Energy {
     }
 
     function getConsumptionSessions(address addr) public view returns (UserConsumptionSession[] memory sessions) {
-        require( msg.sender == _owner, "You are not authorized to execute this method" );
+        require( _owners[msg.sender], "You are not authorized to execute this method" );
         uint length = _userConsumptionSessions[addr].length;
         UserConsumptionSession[]
             memory userSessions = new UserConsumptionSession[](length);
@@ -186,7 +186,7 @@ contract Energy {
     }
 
     function consume(address unit,address consumer,uint256 wh ) public returns (uint256) {
-        require( msg.sender == _owner, "You are not authorized to execute this method" );
+        require( _owners[msg.sender], "You are not authorized to execute this method" );
         require( getStorageUnitState(unit), "Method can be called only by active storage units");
         require( consumer != unit, "Storage units not allowed to consume energy themselfs" );
 
@@ -216,7 +216,7 @@ contract Energy {
     }
 
     function produce( address unit, address producer, uint256 wh ) public returns (uint256) {
-        require( msg.sender == _owner, "You are not authorized to execute this method");
+        require( _owners[msg.sender], "You are not authorized to execute this method");
         require( getStorageUnitState(unit), "Method can be called only by active storage units");
         require( producer != msg.sender, "Storage units not allowed to produce energy themselfs");
 
@@ -228,7 +228,7 @@ contract Energy {
     }
 
     function balanceStorageUnitEnergy(address unit, uint256 actualEnergy) public {
-        require( msg.sender == _owner, "You are not authorized to execute this method");
+        require( _owners[msg.sender], "You are not authorized to execute this method");
         require( getStorageUnitState(unit),"Method can be called only by active storage units");
         _storage.balanceStorageUnitEnergy(unit, actualEnergy);
     }
@@ -245,7 +245,6 @@ contract Energy {
             }
         }
     }
-
     function clearSession(string memory sessionID) private {
         ConsumptionSession memory session = _activeSessions[sessionID];
         if ( block.timestamp < session.timestamp + _parameters.H() && 
@@ -266,25 +265,5 @@ contract Energy {
                 address(0),
                 address(0)
             );
-    }
-    // Handle energy tokens >>>>>>>
-    function energyTokenBalance( address addr ) public view returns (uint256 available, uint256 locked) {
-        return (_ENT.balance(addr), _ENT.lockedBalance(addr));
-    }
-
-    function transferEnergyTokens( address from, address to, uint256 amnt ) public {
-        require(
-            msg.sender == _owner,
-            "You are not authorized to execute this method"
-        );
-        _ENT.transfer(from, to, amnt);
-    }
-
-    function getTotalENT() public view returns (uint256 amnt) {
-        return _ENT.total();
-    }
-
-    function getENTAddress() public view returns (address token) {
-        return address(_ENT);
     }
 }
