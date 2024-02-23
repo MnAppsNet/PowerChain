@@ -13,7 +13,7 @@ The install_prerequisites.sh script installs all the prerequisites for PowerChai
 This script is used to generate the validator nodes for a private proof of authority Ethereum network and a bootnode. It will create a "network" folder which will contain a bootnode folder and one folder for each
 validator. In each folder there is a "start.sh" script which starts the node. The validator folder will also
 include a "startSigner.sh" script which starts an external signer (Clef). An external signer is used to avoid
-having to unlock the validator nodes and have then exposed to unwanted JSON-RPC API calls. The first validator is getting assigned with 10^20 ETH (They have to be send to the faucet).
+having to unlock the validator nodes and have then exposed to unwanted JSON-RPC API calls.
 
 ### pc_CreateAccount
 This script create a normal network node. No external signer is needed.
