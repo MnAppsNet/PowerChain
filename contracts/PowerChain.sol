@@ -90,6 +90,9 @@ contract PowerChain {
     function getStorageUnitsInfo() external view returns (Storage.StorageUnitInfo[] memory){
         return _energy.getStorageUnitsInfo();
     }
+    function getStorageUnitEnergy(address unit) external view returns (uint256){
+        return _energy.getAvailableEnergy(unit);
+    }
     function getConsumptionSessionEnergy( address addr ) view external returns (uint256 sessionWh) {
         return _energy.getConsumptionSessionEnergy(msg.sender, addr);
     }

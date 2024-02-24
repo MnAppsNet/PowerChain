@@ -14,7 +14,7 @@ const Energy = (props) => {
                 label: controller.strings.consumeEnergy,
                 info: [
                     controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.ENT]+" "+Blockchain.TOKENS.ENT,
-                    controller.strings.energy+ ": {amount - burnCost} kwh"
+                    controller.strings.energy+ ": {amount - amount * burnCost} kwh"
                 ],
                 inputItems: [{
                     id: "account",
@@ -40,10 +40,10 @@ const Energy = (props) => {
                 value: (controller.totalEnergy + " kWh")
             }, {
                 label: controller.strings.burnCost,
-                value: (controller.burnCost + " ENT")
+                value: (controller.burnCost + " ENT/kWh")
             }, {
                 label: controller.strings.mintCost,
-                value: (controller.mintCost + " ENT")
+                value: (controller.mintCost + " ENT/kWh")
             }],
             buttons: null
         },
@@ -57,7 +57,7 @@ const Energy = (props) => {
                     label: controller.strings.startSession,
                     info: [
                         controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.ENT]+" "+Blockchain.TOKENS.ENT,
-                        controller.strings.energy+ ": {amount - burnCost} kwh"
+                        controller.strings.energy+ ": {amount - amount * burnCost} kwh"
                     ],
                     inputItems: [{
                         id: "account",

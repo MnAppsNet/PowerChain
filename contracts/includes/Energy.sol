@@ -91,13 +91,12 @@ contract Energy {
     function getMintingCost() public view returns (uint256) {
         return _mintingCost;
     }
-
+    function getEnergyTokenDifference() private view returns(uint256){
+        return _tools.distance( (_storage.totalNetworkEnergy() * _tools.multiplier()) / 1000, _ENT.total() );
+    }
     function setCost() public{
         //Set ENT cost for minting / burning tokens
-        uint256 totalEnergy = _storage.totalNetworkEnergy();
-        uint256 cost = 
-            (_tools.distance( (totalEnergy * _tools.multiplier()) / 1000, _ENT.total() )
-             * _parameters.C() / _tools.multiplier());
+        uint256 cost = getEnergyTokenDifference() * _parameters.C() / _tools.multiplier();
 
         _mintingCost = cost;
         _burningCost = cost;
@@ -124,8 +123,23 @@ contract Energy {
 
         //Check Wh to be consumed
         uint256 cost = getBurningCost();
-        require(entAmmount>cost, "ENT amount not enough to cover burning cost");
-        uint256 wh = (entAmmount - cost) * 1000 / _tools.multiplier(); //Get amount of wh to be consumed
+        uint256 burnRate = _tools.multiplier() + cost; //ENT burned per 1 kWh
+        //uint256 whPerEnt = _tools.multiplier() * 1000 / burnRate; //wh per 1 ENT burned
+        uint256 wh = entAmmount * 1000 / burnRate ;
+        //uint256 wh = 0;
+        //if (whPerEnt < 1000){ //There is a cost
+        //    uint256 entUntilEquilibrium = getEnergyTokenDifference() / (1000 - whPerEnt);
+        //    uint256 ent = entAmmount;
+        //    if (entUntilEquilibrium < ent){ //Apply cost until equilibrium
+        //        ent -= entUntilEquilibrium;
+        //        wh = whPerEnt * entUntilEquilibrium / _tools.multiplier();
+        //        whPerEnt = 1000;
+        //    }
+        //    wh += whPerEnt * ent / _tools.multiplier();
+        //}else{ //No cost
+        //    wh = 1000 * entAmmount / _tools.multiplier();
+        //}
+
         require( _storage.availableEnergy(unit) >= wh, "No energy available in storage unit" );
         _storage.lockEnergy(unit,wh); //Remove kwh to be consumsed from available kwh (not consumed yet just locked for consumtions)
         
@@ -200,23 +214,43 @@ contract Energy {
         string memory sessionID = getConsumptionSessionID(unit, consumer);
         clearSession(sessionID); //Clear session if it's not valid
         require(  _activeSessions[sessionID].state, "No active consumption session with provided consumer");
+        bool equilibriumReached = false;
         uint256 cost = _activeSessions[sessionID].cost;
+        uint256 burnRate = _tools.multiplier() + cost; //ENT burned per 1 kWh
+        uint256 whOffset = 0;
         if (_activeSessions[sessionID].wh < wh) {
             //!\\ Warning //!\\
+            whOffset = wh - _activeSessions[sessionID].wh;
             wh = _activeSessions[sessionID].wh;
             //Over-Consumption
         }
-        uint256 amnt = wh * _tools.multiplier() / 1000 + cost; //Get amount of ent to be burned
-        uint256 lockedBalance = _ENT.balanceLockedFromContractor(consumer, unit);
-        if (lockedBalance < amnt) {
-            amnt = lockedBalance;
+        uint256 whConsumed = wh;
+        uint256 amnt = 0; //Amount to be burned
+        if (cost > 0){
+            uint256 whUntilEquilibrium = getEnergyTokenDifference() / cost * 1000;
+            if (whUntilEquilibrium < whConsumed){ 
+                //Apply cost until equilibrium
+                whConsumed -= whUntilEquilibrium;
+                amnt = whUntilEquilibrium * burnRate / 1000;
+                burnRate = _tools.multiplier();
+                equilibriumReached = true;
+                _activeSessions[sessionID].cost = 0;
+            }
         }
+        amnt += whConsumed * burnRate / 1000;
         _ENT.unlockAmmount(consumer, unit, amnt);
         _ENT.burn(consumer, amnt);
         _activeSessions[sessionID].wh -= wh;
         _storage.consumeLockedEnergy(unit,wh);
-
+        if (whOffset > 0) {
+            //If more energy was consumed, align storage unit energy
+            uint256 unitEnergy = _storage.totalEnergy(unit);
+            if (unitEnergy <= whOffset )
+                whOffset = unitEnergy;
+            balanceStorageUnitEnergy(unit, unitEnergy - whOffset);
+        }
         if (_activeSessions[sessionID].wh == 0) clearSession(sessionID);
+        if (equilibriumReached) setCost();
         return amnt;
     }
 
@@ -224,13 +258,26 @@ contract Energy {
         require( _owners[msg.sender], "You are not authorized to execute this method");
         require( getStorageUnitState(unit), "Method can be called only by active storage units");
         require( producer != unit, "Storage units not allowed to produce energy themselfs");
-        uint256 cost = getMintingCost();
-        uint256 mint = wh * _tools.multiplier() / 1000;
-        if (mint < cost) mint = cost;
-        uint256 amnt = mint - cost;
+        uint256 cost = getMintingCost(); // Mint cost
+        uint256 mintRate = _tools.multiplier() - cost; //ENT minted per 1 kWh
+        bool equilibriumReached = false;
+        uint amnt = 0;
+        uint256 whProduced = wh; //10000
+        if (cost > 0){
+            uint256 whUntilEquilibrium = getEnergyTokenDifference() / cost * 1000;
+            if (whUntilEquilibrium <= whProduced){
+                whProduced -= whUntilEquilibrium;
+                amnt += whUntilEquilibrium * mintRate / 1000;
+                mintRate = _tools.multiplier();
+                equilibriumReached = true;
+            }
+        }
+        amnt += whProduced * mintRate / 1000;
+
         _storage.produceEnergy(unit,wh);
         _ENT.mint( _storage.owner(unit), (amnt * _parameters.F() / _tools.multiplier()) ); //Storage provider cut
         _ENT.mint( producer, (amnt * (_tools.multiplier() - _parameters.F()) / _tools.multiplier()) ); //Energy producer payment
+        if (equilibriumReached) setCost();
         return amnt;
     }
 
@@ -262,7 +309,7 @@ contract Energy {
             return; //Session still relevant, don't clear...
         }
         //Return locked ENT to consumer and locked Wh to storage unit :
-        _ENT.unlockAmmount( session.consumer, session.unit, 99999999999999999); //Unlock locked ENT
+        _ENT.unlockAmmount( session.consumer, session.unit ); //Unlock locked ENT
         _storage.unlockEnergy(session.unit,session.wh);
         //Remove session :
         _activeSessions[sessionID] = ConsumptionSession(
