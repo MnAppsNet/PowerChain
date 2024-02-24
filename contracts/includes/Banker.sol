@@ -31,13 +31,18 @@ contract Banker{
     function burnLockedeEuro(address addr, uint256 amnt) public {
         require(_owners[msg.sender],"You are not authorized to execute this method");
         require(addr == _banker, "Only banker can burn locked eEuro");
-        require(_eEuro.balanceLockedFromContractor(addr, _banker) > amnt, "Not enough locked eEuro");
-        _eEuro.unlockAmmount(addr, _banker, amnt);
+        require(_eEuro.balanceLockedFromContractor(addr, address(this)) >= amnt, "Not enough locked eEuro");
+        _eEuro.unlockAmmount(addr, address(this), amnt);
         _eEuro.burn(addr, amnt);
     }
     function lockeEuro(address addr, uint256 amnt) public{
         require(_owners[msg.sender],"You are not authorized to execute this method");
-        _eEuro.lockAmmount(addr, _banker, amnt);
+        _eEuro.lockAmmount(addr, address(this), amnt);
+    }
+    function unlockeEuro(address addr, uint256 amnt) public{
+        require(_owners[msg.sender],"You are not authorized to execute this method");
+        require(addr == _banker, "Only banker can unlock locked eEuro");
+        _eEuro.unlockAmmount(addr, address(this), amnt);
     }
 
 }

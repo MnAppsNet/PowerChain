@@ -21,6 +21,7 @@ const Voting = (props) => {
             info: null,
             buttons: [
                 {
+                    //Add Voter
                     popup: {
                         type: "text",
                         title: controller.strings.addVoter,
@@ -35,6 +36,7 @@ const Voting = (props) => {
                     }
                 },
                 {
+                    //Remove Voter
                     popup: {
                         type: "text",
                         title: controller.strings.removeVoter,
@@ -49,6 +51,7 @@ const Voting = (props) => {
                     }
                 },
                 {
+                    //Add Storage Unit
                     popup: {
                         type: "text",
                         title: controller.strings.addStorageUnit,
@@ -68,6 +71,7 @@ const Voting = (props) => {
                     }
                 },
                 {
+                    //Remove Storage Unit
                     popup: {
                         type: "text",
                         title: controller.strings.removeStorageUnit,
@@ -79,6 +83,21 @@ const Voting = (props) => {
                             default: "0x..."
                         }],
                         onClick: (...args) => controller.removeStorageUnit(...args)
+                    }
+                },
+                {
+                    //Change Banker Address
+                    popup: {
+                        type: "text",
+                        title: controller.strings.changeBanker,
+                        label: controller.strings.changeBanker,
+                        inputItems: [{
+                            id: "address",
+                            text: controller.strings.address,
+                            type: "text",
+                            default: "0x..."
+                        }],
+                        onClick: (...args) => controller.changeBanker(...args)
                     }
                 }
             ]

@@ -40,7 +40,11 @@ contract Tools {
 
     function concat(string memory a, uint256 b
     ) public pure returns (string memory) {
-        return string(abi.encodePacked(a, b));
+        return string(abi.encodePacked(a, uint2str(b)));
+    }
+    function concat(uint256 a, string memory b
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(uint2str(a), b));
     }
 
     function equal( string memory a, string memory b ) public pure returns (bool) {
@@ -72,4 +76,38 @@ contract Tools {
         }
         str = string(bstr);
     }
+
+    //Strings:
+    function UNIT_REGISTERED(address unit) public pure returns(string memory){return concat("Storage unit registered >> ", unit);}
+    function UNIT_DISABLED(address unit) public pure returns(string memory){return concat("Storage unit disabled >> ", unit);}
+    function SESSION_STARTED(string memory consumptionSessionID) public pure returns(string memory){return concat("Consumption session started >>",consumptionSessionID);}
+    function INVALID_PARAM(string memory param) public pure returns(string memory){return concat("Given param is not valid >>",param);}
+    function PARAM_SET(string memory param, uint256 value) public pure returns(string memory){return concat(concat("Parameter ", param, " set to "),value);}
+    function BANKER_CHANGED(address addr) public pure returns(string memory){return concat("Banker changed to >> ", addr);}
+    function EEURO_MINTED(address addr, uint256 amnt) public pure returns(string memory){return concat(concat(amnt/multiplier, " eEuro minted into "),addr);}
+    function EEURO_BURNED(address addr, uint256 amnt) public pure returns(string memory){return concat(concat(amnt/multiplier, " eEuro burned from "),addr);}
+    function EEURO_LOCKED(uint256 amnt) public pure returns(string memory){return concat(amnt, " eEuro locked");}
+    function EEURO_UNLOCKED(address addr, uint256 amnt) public pure returns(string memory){return concat(concat(amnt, " eEuro unlocked into "),addr);}
+    function VOTE(int vote, string memory voteString) public pure returns(string memory){
+        return (vote == 1)
+                ? concat(
+                    concat("You are in favor of: '", voteString),
+                    "'. Execute the method again to change your mind."
+                )
+                : concat(
+                    concat("You are against of: '", voteString),
+                    "'. Execute the method again to change your mind"
+                );
+    }
+    function VOTER_ADDED(address addr) public pure returns(string memory){return concat("New voter added >> ", addr);}
+    function VOTER_REMOVED(address addr) public pure returns(string memory){return concat("Voter removed >> ", addr);}
+
+    string public constant UNIT_ALREADY_ACTIVE = "Storage unit is already active...";
+    string public constant UNIT_NOT_ACTIVE = "Storage unit is not active...";
+    string public constant USER_ALREADY_VOTER = "User is already a voter...";
+    string public constant NOT_VOTER = "User is not a voter...";
+    string public constant ORDER_ADDED = "Order added in the order book";
+    string public constant ORDER_REMOVED = "Order removed from the order book";
+    string public constant CONTACT_DESTOYED = "Vote passed. Contract is destroyed.";
+
 }

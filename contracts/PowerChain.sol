@@ -28,9 +28,9 @@ contract PowerChain {
         _tools = new Tools();
         _ENT = new Token("ENT");
         _eEuro = new Token("eEuro");
+        _parameters = new Parameters(_tools);
         _energy = new Energy(_parameters,_tools,_ENT);
         _banker = new Banker(_eEuro, _tools);
-        _parameters = new Parameters(_tools);
         _Voters = new Voters(msg.sender,_tools);
         _trade = new Trade(_ENT,_eEuro,_tools);
         //Set authorizations :
@@ -42,43 +42,20 @@ contract PowerChain {
 
     //-------------------------------------------------------------------------------
     //Energy >>>>>>>
-    function getStorageUnits() external returns (address[] memory units) {
-        try _energy.getStorageUnits() returns (address[] memory storageUnits) {
-            return storageUnits;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
+    function getTotalEnergy() external view returns (uint256 wh) {
+        return _energy.getTotalEnergy();
     }
-    function getStorageUnitEnergy(address unit) external returns (uint256 unitEnergy) {
-        //Returns storage unit energy in wh
-        try _energy.getAvailableEnergy(unit) returns (uint256 energy) {
-            return energy;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
-    }
-    function getTotalEnergy() external returns (uint256 wh) {
-        try _energy.getTotalEnergy() returns (uint256 totalWh) {
-            return totalWh;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
-    }
-    function getEnergyRates() external view returns(uint256 mint, uint256 burn){
-        return (_energy.getMintRate(),_energy.getBurnRate());
+    function getEnergyCosts() external view returns(uint256 mint, uint256 burn){
+        return (_energy.getMintingCost(),_energy.getBurningCost());
     }
     function registerStorageUnit(address unit, address owner) external {
         if (_energy.getStorageUnitState(unit)) {
-            emit Error("Storage unit is already active...");
+            emit Error(_tools.UNIT_ALREADY_ACTIVE());
             return;
         }
-        string memory voteString = _tools.concat(
-            _tools.concat(_tools.concat("register_", unit), "_"),
-            owner
-        );
-        if (startVote(voteString)) {
+        if (startVote(_Voters.VOTE_ADD_UNIT(unit,owner))) {
             try _energy.registerUnit(unit, owner) {
-                emit Info(_tools.concat("Storage unit registered >> ", unit));
+                emit Info(_tools.UNIT_REGISTERED(unit));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
@@ -86,32 +63,23 @@ contract PowerChain {
     }
     function removeStorageUnit(address unit) external {
         if (!_energy.getStorageUnitState(unit)) {
-            emit Error("Storage unit is not active...");
+            emit Error(_tools.UNIT_NOT_ACTIVE());
             return;
         }
-        string memory voteString = _tools.concat("remove_", unit);
-        if (startVote(voteString)) {
+        if (startVote(_Voters.VOTE_REMOVE_UNIT(unit))) {
             try _energy.disableStorageUnit(unit) {
-                emit Info(_tools.concat("Storage unit disabled >> ", unit));
+                emit Info(_tools.UNIT_DISABLED((unit)));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
         }
     }
-    function startConsumptionSession(
-        address storageUnit,
-        uint256 entAmmount
-    ) external {
+    function startConsumptionSession( address storageUnit, uint256 entAmmount) external {
         //Start a consumption session
         try
             _energy.startConsumption(storageUnit, msg.sender, entAmmount)
         returns (string memory consumptionSessionID) {
-            emit Info(
-                _tools.concat(
-                    "Consumption session started >>",
-                    consumptionSessionID
-                )
-            );
+            emit Info(_tools.SESSION_STARTED(consumptionSessionID));
         } catch Error(string memory reason) {
             emit Error(reason);
         }
@@ -122,33 +90,12 @@ contract PowerChain {
     function getStorageUnitsInfo() external view returns (Storage.StorageUnitInfo[] memory){
         return _energy.getStorageUnitsInfo();
     }
-    function getConsumptionSessionEnergy(
-        address addr
-    ) external returns (uint256 sessionWh) {
-        //Get the available energy of a consumption session
-        address unit;
-        address consumer;
-        if (_energy.getStorageUnitState(addr)) {
-            //addr is a storage unit provided by a consumer
-            unit = addr;
-            consumer = msg.sender;
-        } else {
-            //addr is a consumer provided by a storage unit
-            unit = msg.sender;
-            consumer = addr;
-        }
-        try _energy.getConsumptionSessionEnergy(unit, consumer) returns (
-            uint256 wh
-        ) {
-            return wh;
-        } catch Error(string memory reason){
-            emit Error(reason);
-        }
+    function getConsumptionSessionEnergy( address addr ) view external returns (uint256 sessionWh) {
+        return _energy.getConsumptionSessionEnergy(msg.sender, addr);
     }
     function energyProduced(address producer, uint256 wh) external {
         try _energy.produce(msg.sender, producer, wh) {} catch Error(
-            string memory reason
-        ) {
+            string memory reason ) {
             emit Error(reason);
         }
     }
@@ -169,7 +116,7 @@ contract PowerChain {
         try _energy.balanceStorageUnitEnergy(msg.sender,actualEnergy) {} catch Error(string memory reason) {
             emit Error(reason);
         }
-    } 
+    }
     //-------------------------------------------------------------------------------
     //Parameters >>>>>>>
     function getParameters() external view returns(uint256 M, uint256 B, uint256 C, uint256 H, uint256 F) {
@@ -177,13 +124,12 @@ contract PowerChain {
     }
     function setParameter(string memory param,uint256 value) external {
         if (!_parameters.isValidParam(param)){
-            emit Error(_tools.concat("Given param is not valid >>",param));
+            emit Error(_tools.INVALID_PARAM(param));
             return;
         }
-        string memory voteString = _tools.concat(_tools.concat( _tools.concat("setParameter_", param), "_" ),value);
-        if (startVote(voteString)) {
+        if (startVote(_Voters.VOTE_SET_PARAMETER(param,value))) {
             try _parameters.setParameter(param,value) {
-                emit Info(_tools.concat(_tools.concat("Parameter ", param, " set to "),value));
+                emit Info(_tools.PARAM_SET(param,value));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
@@ -191,32 +137,31 @@ contract PowerChain {
     }
     //-------------------------------------------------------------------------------
     //Banker >>>>>>>
+    function getBankerAddress() external view returns(address){
+        return _banker.getBanker();
+    }
     function changeBanker(address addr) external {
-        string memory voteString = _tools.concat("changeBankerTo_", addr);
-        if (startVote(voteString)) {
+        if (startVote(_Voters.VOTE_CHANGE_BANKER(addr))) {
             try _banker.changeBanker(addr) {
-                emit Info(_tools.concat("Banker changed to >> ", addr));
+                emit Info(_tools.BANKER_CHANGED(addr));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
         }
     }
     function minteEuro(address addr, uint256 amnt) external {
-        try _banker.minteEuro(msg.sender, addr, amnt) {} catch Error(
-            string memory reason
-        ) {
+        try _banker.minteEuro(msg.sender, addr, amnt) {
+            emit Info(_tools.EEURO_MINTED(addr,amnt));
+        } catch Error( string memory reason ) {
             emit Error(reason);
         }
     }
     function burneEuro(address addr, uint amnt) external {
-        try _banker.burnLockedeEuro(addr, amnt) {} catch Error(
-            string memory reason
-        ) {
+        try _banker.burnLockedeEuro(addr, amnt) {
+            emit Info(_tools.EEURO_BURNED(addr,amnt));
+        } catch Error( string memory reason ) {
             emit Error(reason);
         }
-    }
-    function getBankerAddress() external view returns (address) {
-        return _banker.getBanker();
     }
     function getTotalEeuro() external view returns (uint256){
         return _eEuro.total();
@@ -225,34 +170,37 @@ contract PowerChain {
     //Token >>>>>>>
     function transferENT(address to, uint256 amnt) external {
         try
-            _ENT.transfer(
-                msg.sender,
-                to,
-                amnt
-            )
+            _ENT.transfer( msg.sender, to, amnt )
         {} catch Error(string memory reason) {
             emit Error(reason);
         }
     }
     function balanceENT() external returns (uint256 available, uint256 locked) {
-        try _ENT.totalBalance(msg.sender) returns (
-            uint256 avail,
-            uint256 lock
-        ) {
+        try _ENT.totalBalance(msg.sender) returns ( uint256 avail,  uint256 lock ) {
             return (avail, lock);
         } catch Error(string memory reason) {
             emit Error(reason);
         }
     }
     function transfereEuro(address to, uint256 amnt) external {
-        try
-            _eEuro.transfer(msg.sender, to, amnt)
+        try _eEuro.transfer(msg.sender, to, amnt)
         {} catch Error(string memory reason) {
             emit Error(reason);
         }
     }
     function lockeEuro(uint256 amnt) external {
-        try _banker.lockeEuro(msg.sender, amnt) {} catch Error(
+        try _banker.lockeEuro(msg.sender, amnt) {
+            emit Info(_tools.EEURO_LOCKED(amnt));
+        } catch Error(
+            string memory reason
+        ) {
+            emit Error(reason);
+        }
+    }
+    function unlockeEuro(address addr, uint256 amnt) external {
+        try _banker.unlockeEuro(addr, amnt) {
+            emit Info(_tools.EEURO_UNLOCKED(addr,amnt));
+        } catch Error(
             string memory reason
         ) {
             emit Error(reason);
@@ -271,24 +219,16 @@ contract PowerChain {
             emit Error(reason);
         }
     }
-    function getTotalENT() external returns (uint256 amnt){
-        try _eEuro.total() returns(uint256 ent){
-            return ent;
-        } catch Error(string memory reason){
-            emit Error((reason));
-        }
+    function getTotalENT() external view returns (uint256 amnt){
+        return _ENT.total();
     }
     //-------------------------------------------------------------------------------
     //Voting >>>>>>>
     function isVoter() external view returns (bool voter) {
         return _Voters.isVoter(msg.sender);
     }
-    function getVotes() external returns (Voters.UserInfo[] memory voterVotes){
-        try _Voters.getVotes(msg.sender) returns(Voters.UserInfo[] memory votes){
-            return votes;
-        } catch Error(string memory reason) {
-            emit Error(reason);
-        }
+    function getVotes() external view returns (Voters.UserInfo[] memory voterVotes){
+        return _Voters.getVotes(msg.sender);
     }
     function startVote(string memory voteString) internal returns (bool votePassed) {
         try _Voters.startVote(msg.sender,voteString) returns (int vote) {
@@ -296,44 +236,30 @@ contract PowerChain {
                 //Vote Passed
                 return true;
             }
-            emit Info((vote == 1)
-                ? _tools.concat(
-                    _tools.concat("You are in favor of: '", voteString),
-                    "'. Execute the method again to change your mind."
-                )
-                : _tools.concat(
-                    _tools.concat("You are against of: '", voteString),
-                    "'. Execute the method again to change your mind"
-                ));
+            emit Info(_tools.VOTE(vote,voteString));
             return false;
         } catch Error(string memory reason) {
             emit Error(reason);
             return false;
         }
     }
-
     function addVoter(address addr) external {
-        if (_Voters.isVoter(addr)) {
-            emit Error("User is already a voter...");
-            return;
-        }
-        if (startVote(_tools.concat("Add_Voter_", addr))) {
+        if (startVote(_Voters.VOTE_ADD_VOTER(addr))) {
             try _Voters.add(addr) {
-                emit Info(_tools.concat("New voter added >> ", addr));
+                emit Info(_tools.VOTER_ADDED(addr));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
         }
     }
-
     function removeVoter(address addr) external {
         if (!_Voters.isVoter(addr)) {
-            emit Error("User is not a voter...");
+            emit Error(_tools.NOT_VOTER());
             return;
         }
-        if (startVote(_tools.concat("Remove_Voter_", addr))) {
+        if (startVote(_Voters.VOTE_REMOVE_VOTER(addr))) {
             try _Voters.remove(addr) {
-                emit Info(_tools.concat("Voter removed >> ", addr));
+                emit Info(_tools.VOTER_REMOVED(addr));
             } catch Error(string memory reason) {
                 emit Error(reason);
             }
@@ -341,10 +267,30 @@ contract PowerChain {
     }
 
     //-------------------------------------------------------------------------------
+    //Trading >>>>>>>
+    function getOrders() external view returns(Trade.Order[] memory,Trade.Order[] memory) {
+        return _trade.getOrders();
+    }
+    function addOrder(uint256 price, uint256 quant, bool isBuy) external{
+        try _trade.addOrder(msg.sender, price, quant,isBuy) {
+            emit Info(_tools.ORDER_ADDED());
+        } catch Error(string memory reason) {
+            emit Error(reason);
+        }
+    }
+    function removeOrder(uint256 id, bool isBuy) external{
+        try _trade.removeOrder(msg.sender, id, isBuy) {
+            emit Info(_tools.ORDER_REMOVED());
+        } catch Error(string memory reason) {
+            emit Error(reason);
+        }
+    }
+
+    //-------------------------------------------------------------------------------
     //Contract >>>>>>>
     function destroy() external {
-        if (startVote("destroy_contract")) {
-            emit Info("Vote passed. Contract is destroyed.");
+        if (startVote(_Voters.DESTOY_CONTACT())) {
+            emit Info(_tools.CONTACT_DESTOYED());
             this.destroy();
         }
     }

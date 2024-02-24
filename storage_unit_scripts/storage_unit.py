@@ -78,7 +78,7 @@ tx_hash = w3.eth.send_raw_transaction(signed_tr.rawTransaction)
 tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash,timeout=120)
 try:
     reason = tx_receipt.logs[0].data.decode().replace("\x00","")
-    exit(reason)
+    print(reason)
 except:
     text = ""
     if (args.produce): text = "produced"

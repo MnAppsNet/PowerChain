@@ -29,10 +29,11 @@ class View extends React.Component {
       totalEeuro: 0,
       lockedBalance: { ENT: 0, EUR: 0 },
       totalEnergy: 0,
-      mintRate: 0,
-      burnRate: 0,
+      mintCost: 0,
+      burnCost: 0,
       voter: false,
       votes: [],
+      orders: {"buy":[],"sell":[]},
       sessions: [],
       storageUnitInfo: [],
       bankerAddress: "",
@@ -74,7 +75,9 @@ class View extends React.Component {
     if (prevState.address !== this.state.address) {
       if (this.state.address !== "") {
         this.controller.isVoter();
+        this.controller.getBankerAddress();
         this.controller.getBalance();
+        this.controller.getOrders();
       }
     }
   }

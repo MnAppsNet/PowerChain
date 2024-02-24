@@ -18,11 +18,10 @@ export class Blockchain {
     }
     static METHODS = {
         GET_TOTAL_KWH: "getTotalEnergy",
-        GET_ENERGY_RATES: "getEnergyRates",
+        GET_ENERGY_RATES: "getEnergyCosts",
         BALANCE_EUR: "balanceeEuro",
         BALANCE_ENT: "balanceENT",
         GET_TOTAL_ENT: "getTotalENT",
-        GET_TOTAL_EEURO: "getTotalEeuro",
         GET_BANKER_ADDRESS: "getBankerAddress",
         GET_NETWORK_PARAMETERS: "getParameters",
         TRANSFER_ENT: "transferENT",
@@ -37,6 +36,14 @@ export class Blockchain {
         GET_CONSUMPTION_SESSIONS: "getConsumptionSessions",
         GET_STORAGE_UNIT_INFO: "getStorageUnitsInfo",
         SET_BANKER_ADDRESS: "changeBanker",
+        GET_TOTAL_EURO: "getTotalEeuro",
+        MINT_EURO: "minteEuro",
+        BURN_EURO: "burneEuro",
+        UNLOCK_EURO:"unlockeEuro",
+        LOCK_EURO:"lockeEuro",
+        GET_ORDERS:"getOrders",
+        ADD_ORDER:"addOrder",
+        REMOVE_ORDER:"removeOrder"
     }
     constructor(controller) {
         this.contracts = new Contracts();

@@ -29,13 +29,15 @@ class Controller {
     get web3() { return this.view.state.web3; }
     get connected() { return this.view.state.connected; }
     get voter() { return this.view.state.voter; }
+    get banker() { return (this.bankerAddress.toLowerCase() === this.address.toLowerCase()); }
     get votes() { return this.view.state.votes; }
+    get orders() { return this.view.state.orders; }
     get sessions() { return this.view.state.sessions; }
     get storageUnitInfo() { return this.view.state.storageUnitInfo; }
     get totalENT() { return this.view.state.totalENT; }
     get totalEeuro() { return this.view.state.totalEeuro; }
-    get mintRate() { return this.view.state.mintRate; }
-    get burnRate() { return this.view.state.burnRate; }
+    get mintCost() { return this.view.state.mintCost; }
+    get burnCost() { return this.view.state.burnCost; }
     get popup() { return this.view.state.popup; }
     get bankerAddress() { return this.view.state.bankerAddress }
     get networkParameters() { return this.view.state.networkParameters }
@@ -62,11 +64,12 @@ class Controller {
     }
     set voter(v) { this.view.setState({ voter: v }); }
     set votes(v) { this.view.setState({ votes: v }); }
+    set orders(v) { this.view.setState({ orders: v }); }
     set sessions(v) { this.view.setState({ sessions: v }); }
     set storageUnitInfo(v) { this.view.setState({ storageUnitInfo: v }); }
     set totalENT(v) { this.view.setState({ totalENT: v }); }
-    set mintRate(v) { this.view.setState({ mintRate: v}); }
-    set burnRate(v) { this.view.setState({ burnRate: v}); }
+    set mintCost(v) { this.view.setState({ mintCost: v}); }
+    set burnCost(v) { this.view.setState({ burnCost: v}); }
     set popup(v) { this.view.setState({ popup: v}); }
 
     //Voters >>>>>
@@ -74,6 +77,7 @@ class Controller {
         this.model.executeViewMethod(
             (result) => {
                 this.voter = result;
+                if (this.voter) this.controller.getVotes();
             }, Blockchain.METHODS.IS_VOTER);
     }
     async addVoter(address) {
@@ -159,8 +163,8 @@ class Controller {
     async getEnergyRates() {
         this.model.executeViewMethod(
             (results) => {
-                this.mintRate = this.fromBigNumber(results["mint"]);
-                this.burnRate = this.fromBigNumber(results["burn"]);
+                this.mintCost = this.fromBigNumber(results["mint"]);
+                this.burnCost = this.fromBigNumber(results["burn"]);
             }, Blockchain.METHODS.GET_ENERGY_RATES
         );
     }
@@ -274,6 +278,10 @@ class Controller {
             this.showMessage(this.strings.unavailableBalance);
             return;
         }
+        if (amount <= 0) {
+            this.showMessage(this.strings.invalidAmount);
+            return;
+        }
         if (!this.isAddress(account)) {
             this.showMessage(this.strings.invalidAddress);
             return;
@@ -284,21 +292,76 @@ class Controller {
     }
 
     //Banker >>>>>
-    async getTotalEeuro() {
+    async getTotalEuro() {
         this.model.executeViewMethod((results) => {
             this.totalEeuro = this.fromBigNumber(results);
-        }, Blockchain.METHODS.GET_TOTAL_EEURO);
+        }, Blockchain.METHODS.GET_TOTAL_EURO);
     }
     async getBankerAddress() {
         this.model.executeViewMethod((results) => {
             this.bankerAddress = results;
         }, Blockchain.METHODS.GET_BANKER_ADDRESS);
     }
-    async changeBanker() {
-        // !!!!!!!
+    async changeBanker(addr) {
+        if (!this.isAddress(addr)) {
+            this.showMessage(this.strings.invalidAddress);
+            return;
+        }
+        this.model.executeModifyStateMethod((_) => {
+            this.getBankerAddress();
+        }, Blockchain.METHODS.SET_BANKER_ADDRESS,addr)
+    }
+    async mintEuro(addr,amount){
+        if (!this.isAddress(addr)) {
+            this.showMessage(this.strings.invalidAddress);
+            return;
+        }
+        if (amount <= 0){
+            this.showMessage(this.strings.invalidAmount);
+            return;
+        }
+        this.model.executeModifyStateMethod((_) => {
+            this.getTotalEuro();
+        }, Blockchain.METHODS.MINT_EURO,addr,this.toBiglNumber(amount))
+    }
+    async burnEuro(addr,amount){
+        if (!this.isAddress(addr)) {
+            this.showMessage(this.strings.invalidAddress);
+            return;
+        }
+        if (amount <= 0){
+            this.showMessage(this.strings.invalidAmount);
+            return;
+        }
+        this.model.executeModifyStateMethod((_) => {
+            this.getTotalEuro();
+        }, Blockchain.METHODS.BURN_EURO,addr,this.toBiglNumber(amount))
+    }
+    async unlockEuro(addr,amount){
+        if (!this.isAddress(addr)) {
+            this.showMessage(this.strings.invalidAddress);
+            return;
+        }
+        if (amount <= 0){
+            this.showMessage(this.strings.invalidAmount);
+            return;
+        }
+        this.model.executeModifyStateMethod((_) => {
+            this.getTotalEuro();
+        }, Blockchain.METHODS.UNLOCK_EURO,addr,this.toBiglNumber(amount))
+    }
+    async lockEuro(amount){
+        if (amount <= 0){
+            this.showMessage(this.strings.invalidAmount);
+            return;
+        }
+        if (Number(this.balance[Blockchain.TOKENS.EUR]) < Number(amount)) {
+            this.showMessage(this.strings.unavailableBalance);
+            return;
+        }
         this.model.executeModifyStateMethod((_) => {
             this.getBalance();
-        }, Blockchain.METHODS.SET_BANKER_ADDRESS)
+        }, Blockchain.METHODS.LOCK_EURO,this.toBiglNumber(amount))
     }
 
     //Network >>>>>
@@ -316,6 +379,77 @@ class Controller {
             this.networkParameters = params;
         }, Blockchain.METHODS.GET_NETWORK_PARAMETERS);
     }
+
+    //Market >>>>>
+    async getOrders() {
+        this.model.executeViewMethod(
+            (results) => {
+                const buyOrders = results[0];
+                const sellOrders = results[1];
+                const buy = [];
+                const sell = [];
+                buyOrders.forEach((item) => {
+                    if(item["valid"]){
+                        const id = item["id"];
+                        const user = item["user"];
+                        const price = this.fromBigNumber(item["price"]);
+                        const quantity = this.fromBigNumber(item["quantity"]);
+                        buy.push({
+                            label: id + " | " + user,
+                            value: quantity + " ENT | " + price + " eEuro/ENT",
+                        })
+                    }
+                });
+                sellOrders.forEach((item) => {
+                    if(item["valid"]){
+                        const id = item["id"];
+                        const user = item["user"];
+                        const price = this.fromBigNumber(item["price"]);
+                        const quantity = this.fromBigNumber(item["quantity"]);
+                        sell.push({
+                            label: id + " | " + user,
+                            value: quantity + " ENT | " + price + " eEuro/ENT",
+                        })
+                    }
+                });
+                if (buy.length === 0) {
+                    buy.push({
+                        label: this.strings.noData
+                    })
+                }
+                if (sell.length === 0) {
+                    sell.push({
+                        label: this.strings.noData
+                    })
+                }
+                this.orders["buy"] = buy;
+                this.orders["sell"] = sell;
+            }, Blockchain.METHODS.GET_ORDERS)
+    }
+    async addBuyOrder(price,quantity){
+        this.addOrder(price,quantity,true);
+    }
+    async addSellOrder(price,quantity){
+        this.addOrder(price,quantity,false);
+    }
+    async removeBuyOrder(id){
+        this.removeOrder(id,true);
+    }
+    async removeSellOrder(id){
+        this.removeOrder(id,false);
+    }
+    async addOrder(price,quantity,isBuy){
+        this.model.executeModifyStateMethod((_) => {
+            this.getOrders();
+        }, Blockchain.METHODS.ADD_ORDER,this.toBiglNumber(price),this.toBiglNumber(quantity),isBuy)
+    }
+    async removeOrder(id,isBuy){
+        this.model.executeModifyStateMethod((_) => {
+            this.getOrders();
+        }, Blockchain.METHODS.REMOVE_ORDER,id,isBuy)
+    }
+
+
     //Other >>>>>
     toBiglNumber(number){
         return Web3.utils.toWei(number,"ether")

@@ -4,6 +4,8 @@ import Sidebar from "./Sidebar";
 import Tokens from "./pages/Tokens.js";
 import Energy from "./pages/Energy.js";
 import Voting from "./pages/Voting.js";
+import Banker from "./pages/Banker.js";
+import Market from "./pages/Market.js";
 import {
     FiHome,
     FiWind,
@@ -11,6 +13,10 @@ import {
     FiRefreshCw,
     FiInfo,
 } from 'react-icons/fi'
+import {
+    FaMoneyCheck,
+    FaStore
+} from 'react-icons/fa'
 import {
     Box,
     Button
@@ -36,8 +42,10 @@ const Dashboard = (props) => {
     class Sections {
         static Tokens = 1;
         static Energy = 2;
-        static Voting = 3;
-        static Network = 4;
+        static Network = 3;
+        static Market = 4;
+        static Voting = 5;
+        static Banker = 6;
     }
     const controller = props.controller;
 
@@ -57,12 +65,23 @@ const Dashboard = (props) => {
             name: controller.strings.networkInfo, icon: FiInfo, action: () => {
                 setSection(Sections.Network);
             }
+        }, {
+            name: controller.strings.market, icon: FaStore, action: () => {
+                setSection(Sections.Market);
+            }
         },
     ]
     if (controller.voter) {
         menuItems.push({
             name: controller.strings.voting, icon: FiUsers, action: () => {
                 setSection(Sections.Voting);
+            }
+        });
+    }
+    if (controller.banker) {
+        menuItems.push({
+            name: controller.strings.banker, icon: FaMoneyCheck, action: () => {
+                setSection(Sections.Banker);
             }
         });
     }
@@ -83,9 +102,15 @@ const Dashboard = (props) => {
                 controller.getVotes(controller.address);
                 break;
             case Sections.Network:
-                controller.getTotalEeuro();
+                controller.getTotalEuro();
                 controller.getBankerAddress();
                 controller.getNetworkParameters();
+                break;
+            case Sections.Banker:
+                controller.getTotalEuro();
+                break;
+            case Sections.Market:
+                controller.getOrders();
                 break;
             default:
                 break;
@@ -116,6 +141,10 @@ const Dashboard = (props) => {
                     return (<Voting controller={controller} />);
                 case Sections.Network:
                     return (<Network controller={controller} />);
+                case Sections.Banker:
+                    return (<Banker controller={controller} />);
+                case Sections.Market:
+                    return (<Market controller={controller} />);
               default:
                 return ("");
             }

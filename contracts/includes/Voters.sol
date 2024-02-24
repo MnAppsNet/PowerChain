@@ -70,12 +70,9 @@ contract Voters{
         }
         return vote;
     }
-    function getVotes(address addr) public returns(UserInfo[] memory){
+    function getVotes(address addr) public view returns(UserInfo[] memory){
         require(msg.sender == _owner,"Not allowed to execute this method");
         require(_voters[addr],"You are not a voter");
-        for(uint i = 0; i < _userVoteStrings[addr].length; i++){
-            _userVoteStrings[addr][i].passed = isVotePassed(_userVoteStrings[addr][i].vote);
-        }
         return _userVoteStrings[addr]; 
     }
     function checkIfVoteIsPassed(uint count) internal view returns(bool){
@@ -103,9 +100,23 @@ contract Voters{
             _userVoteStrings[addr][_userVoteExists[addr][vote]-1] = UserInfo(vote,_votes[vote].userVotes[addr],passed);
         }
         _votes[vote].passed = passed;
+        for(uint i = 0; i < _userVoteStrings[addr].length; i++){
+            _userVoteStrings[addr][i].passed = isVotePassed(_userVoteStrings[addr][i].vote);
+        }
         return voteVal;
     }
     function isVotePassed(string memory vote) public view returns (bool){
         return _votes[vote].passed;
     }
+
+    //Votes:
+    function VOTE_SET_PARAMETER(string memory param, uint256 value) public view returns(string memory){return _tools.concat(_tools.concat(_tools.concat("setParameter_", param), "_" ),value);}
+    function VOTE_CHANGE_BANKER(address addr) public view returns(string memory){return _tools.concat("changeBankerTo_", addr);}
+    function VOTE_ADD_VOTER(address addr) public view returns(string memory){return _tools.concat("Add_Voter_", addr);}
+    function VOTE_REMOVE_VOTER(address addr) public view returns(string memory){return _tools.concat("Remove_Voter_", addr);}
+    function VOTE_ADD_UNIT(address unit, address owner) public view returns(string memory){return _tools.concat( _tools.concat(_tools.concat("register_", unit), "_"), owner );}
+    function VOTE_REMOVE_UNIT(address unit) public view returns(string memory){return _tools.concat("remove_", unit);}
+    
+    string public constant DESTOY_CONTACT = "destroy_contract";
+
 }

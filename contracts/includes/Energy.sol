@@ -21,7 +21,7 @@ contract Energy {
         //Parameters of a consumsion session
         bool state;
         uint256 wh; //Available wh to consume
-        uint256 rate; //Burn rate
+        uint256 cost; //Burn cost
         uint256 timestamp;
         address consumer;
         address unit;
@@ -38,6 +38,8 @@ contract Energy {
     mapping(address => mapping(string => bool))
         internal _userConsumptionSessionExists;
     mapping(string => ConsumptionSession) internal _activeSessions;
+    uint256 _mintingCost = 0;
+    uint256 _burningCost = 0;
 
     constructor(Parameters params, Tools tools, Token ent) {
         _tools = tools;
@@ -45,6 +47,8 @@ contract Energy {
         _parameters = params;
         _owners[msg.sender] = true;
         _storage = new Storage(this);
+        _mintingCost = 0;
+        _burningCost = 0;
     }
 
     // Handle storage units >>>>>>>
@@ -81,32 +85,28 @@ contract Energy {
     }
 
     // Handle energy production/consumption >>>>>>>
-    function getBurnRate() public view returns (uint256) {
-        //ENT To be burned per kWh consumed
-        uint256 totalEnergy = _storage.totalNetworkEnergy();
-        if (totalEnergy == 0) return 1 * _tools.multiplier();
-        uint256 loss = (_tools.distance(
-            (totalEnergy * _tools.multiplier()) / 1000,
-            _ENT.total()
-        ) * _parameters.C()) / _tools.multiplier();
-        if (_tools.multiplier() + loss < _parameters.B())
-            return _tools.multiplier() + loss;
-        else return _parameters.B();
+    function getBurningCost() public view returns (uint256) {
+        return _burningCost;
+    }
+    function getMintingCost() public view returns (uint256) {
+        return _mintingCost;
     }
 
-    function getMintRate() public view returns (uint256) {
-        //ENT To be minter per kWh produced
+    function setCost() public{
+        //Set ENT cost for minting / burning tokens
         uint256 totalEnergy = _storage.totalNetworkEnergy();
-        if (totalEnergy == 0) return 1 * _tools.multiplier();
-        uint256 loss = (_tools.distance(
-            (totalEnergy * _tools.multiplier()) / 1000,
-            _ENT.total()
-        ) * _parameters.C()) / _tools.multiplier();
-        if (_tools.multiplier() > loss) {
-            uint256 tempMintRate = _tools.multiplier() - loss;
-            if (tempMintRate > _parameters.M()) return tempMintRate;
-            else return _parameters.M();
-        } else return _parameters.M();
+        uint256 cost = 
+            (_tools.distance( (totalEnergy * _tools.multiplier()) / 1000, _ENT.total() )
+             * _parameters.C() / _tools.multiplier());
+
+        _mintingCost = cost;
+        _burningCost = cost;
+        if (_mintingCost > _parameters.M()) {
+            _mintingCost = _parameters.M();
+        }
+        if (_burningCost > _parameters.M()) {
+            _burningCost = _parameters.M();
+        }
     }
     function getConsumptionSessionID( address unit, address consumer ) internal view returns (string memory) {
         return _tools.concat(unit, consumer);
@@ -123,8 +123,9 @@ contract Energy {
         require( !_activeSessions[consumptionSessionID].state, "Another consumption session is already active with the provided storage unit");
 
         //Check Wh to be consumed
-        uint256 rate = getBurnRate();
-        uint256 wh = (entAmmount / rate) * 1000; //Get amount of wh to be consumed
+        uint256 cost = getBurningCost();
+        require(entAmmount>cost, "ENT amount not enough to cover burning cost");
+        uint256 wh = (entAmmount - cost) * 1000 / _tools.multiplier(); //Get amount of wh to be consumed
         require( _storage.availableEnergy(unit) >= wh, "No energy available in storage unit" );
         _storage.lockEnergy(unit,wh); //Remove kwh to be consumsed from available kwh (not consumed yet just locked for consumtions)
         
@@ -132,7 +133,7 @@ contract Energy {
         _activeSessions[consumptionSessionID] = ConsumptionSession(
             true,
             wh,
-            rate,
+            cost,
             block.timestamp,
             consumer,
             unit
@@ -150,10 +151,17 @@ contract Energy {
 
     function getConsumptionSessionEnergy(address unit, address consumer) public view returns (uint256) {
         require(_owners[msg.sender], "You are not authorized to execute this method" );
-        require(_storage.state(unit), "Storage unit not active");
+        address unit_addr = unit;
+        address consumer_addr = consumer;
+        if (!_storage.state(unit_addr)) {
+            //Check if input was given the other way arround
+            unit_addr = consumer;
+            consumer_addr = unit;
+        }
+        require(_storage.state(unit_addr), "Storage unit not active");
         string memory consumptionSessionID = getConsumptionSessionID(
-            unit,
-            consumer
+            unit_addr,
+            consumer_addr
         );
         return _activeSessions[consumptionSessionID].wh;
     }
@@ -161,8 +169,7 @@ contract Energy {
     function getConsumptionSessions(address addr) public view returns (UserConsumptionSession[] memory sessions) {
         require( _owners[msg.sender], "You are not authorized to execute this method" );
         uint length = _userConsumptionSessions[addr].length;
-        UserConsumptionSession[]
-            memory userSessions = new UserConsumptionSession[](length);
+        UserConsumptionSession[] memory userSessions = new UserConsumptionSession[](length);
         uint j = 0;
         for (uint i; i < length; i++) {
             string memory sessionId = _userConsumptionSessions[addr][i];
@@ -193,18 +200,16 @@ contract Energy {
         string memory sessionID = getConsumptionSessionID(unit, consumer);
         clearSession(sessionID); //Clear session if it's not valid
         require(  _activeSessions[sessionID].state, "No active consumption session with provided consumer");
-        uint256 rate = _activeSessions[sessionID].rate;
+        uint256 cost = _activeSessions[sessionID].cost;
         if (_activeSessions[sessionID].wh < wh) {
             //!\\ Warning //!\\
             wh = _activeSessions[sessionID].wh;
             //Over-Consumption
         }
-        uint256 amnt = (wh * rate) / 1000; //Get amount of ent to be consumed
+        uint256 amnt = wh * _tools.multiplier() / 1000 + cost; //Get amount of ent to be burned
         uint256 lockedBalance = _ENT.balanceLockedFromContractor(consumer, unit);
         if (lockedBalance < amnt) {
-            //!\\ Warning //!\\
             amnt = lockedBalance;
-            //Over-Consumption
         }
         _ENT.unlockAmmount(consumer, unit, amnt);
         _ENT.burn(consumer, amnt);
@@ -218,12 +223,14 @@ contract Energy {
     function produce( address unit, address producer, uint256 wh ) public returns (uint256) {
         require( _owners[msg.sender], "You are not authorized to execute this method");
         require( getStorageUnitState(unit), "Method can be called only by active storage units");
-        require( producer != msg.sender, "Storage units not allowed to produce energy themselfs");
-
-        uint256 amnt = (wh * getMintRate()) / 1000;
+        require( producer != unit, "Storage units not allowed to produce energy themselfs");
+        uint256 cost = getMintingCost();
+        uint256 mint = wh * _tools.multiplier() / 1000;
+        if (mint < cost) mint = cost;
+        uint256 amnt = mint - cost;
         _storage.produceEnergy(unit,wh);
-        _ENT.mint( _storage.owner(unit), (amnt * _parameters.F()) / _tools.multiplier() ); //Storage provider cut
-        _ENT.mint( producer, (amnt * (_tools.multiplier() - _parameters.F())) / _tools.multiplier() ); //Energy producer payment
+        _ENT.mint( _storage.owner(unit), (amnt * _parameters.F() / _tools.multiplier()) ); //Storage provider cut
+        _ENT.mint( producer, (amnt * (_tools.multiplier() - _parameters.F()) / _tools.multiplier()) ); //Energy producer payment
         return amnt;
     }
 
@@ -231,6 +238,7 @@ contract Energy {
         require( _owners[msg.sender], "You are not authorized to execute this method");
         require( getStorageUnitState(unit),"Method can be called only by active storage units");
         _storage.balanceStorageUnitEnergy(unit, actualEnergy);
+        setCost();
     }
 
     function clearOldSessions() public {

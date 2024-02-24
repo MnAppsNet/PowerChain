@@ -19,11 +19,11 @@ contract Parameters {
         //Default values
         _tools = tools;
         _owner = msg.sender;
-        M = 1 * _tools.multiplier() / 100; //0.1
-        B = 3 * _tools.multiplier();
-        C = 1 * _tools.multiplier() / 10;  //10%
+        M = 50 * _tools.multiplier() / 100; //0.5 ENT
+        B = 50 * _tools.multiplier() / 100; //0.5 ENT
+        C = 5 * _tools.multiplier()  / 100; //5%
         H = 2 hours;
-        F = 2 * _tools.multiplier() / 10;  //20%
+        F = 20 * _tools.multiplier() / 100;  //20%
     }
     function isValidParam(string memory param) view public returns(bool){
         uint length = parameterStrings.length;

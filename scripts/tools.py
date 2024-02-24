@@ -35,7 +35,9 @@ def deployContract(rpc,path,account:Account=None):
     compiled_sol = compile_source(source,output_values=['abi', 'bin'],
                                   evm_version=EVM_VERSION,
                                   solc_version=SOLC_VERSION,
-                                  base_path=os.path.dirname(path))
+                                  base_path=os.path.dirname(path),
+                                  optimize=True,
+                                  optimize_runs=100)
     main_contract = os.path.splitext(os.path.basename(path))[0]
     abi = None
     bytecode = None

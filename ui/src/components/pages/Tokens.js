@@ -63,10 +63,11 @@ const Tokens = (props) => {
             }],
             buttons: [
                 {
+                    //Transfer eEuro
                     popup: {
                         type: "number",
                         title: controller.strings.transfer,
-                        label: "Transfer",
+                        label: controller.strings.transfer,
                         inputItems: [{
                             id: "account",
                             text: controller.strings.accountAddress,
@@ -79,6 +80,21 @@ const Tokens = (props) => {
                             default: 0
                         }],
                         onClick: (...args) => controller.transferEUR(...args)
+                    }
+                },
+                {
+                    popup:{
+                        //Cash out eEuro
+                        type: "number",
+                        title: controller.strings.lockEuro,
+                        label: controller.strings.lockEuro,
+                        inputItems: [{
+                            id: "amount",
+                            text: controller.strings.amount,
+                            type: "number",
+                            default: 0
+                        }],
+                        onClick: (...args) => controller.lockEuro(...args)
                     }
                 }
             ]
