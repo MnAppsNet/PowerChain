@@ -1,0 +1,266 @@
+%% ----------------------------------------------------------------
+%% Thesis.tex -- MAIN FILE 
+%% ---------------------------------------------------------------- 
+
+% Set up the document
+\documentclass[a4paper, 11pt, oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\graphicspath{Figures/}  % Location of the graphics files (set up for graphics to be in PDF format)
+% Table configuration packages
+\usepackage{array,graphicx}
+\usepackage{booktabs}
+\usepackage{pifont}
+\usepackage{libertine}
+\usepackage{tabu}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{textcomp}
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{empheq}
+\usepackage{pgfplots}
+\usepackage[export]{adjustbox}
+\makeatother
+
+% Include any extra LaTeX packages required
+\usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
+\usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
+\usepackage{float} % To keep figures in place
+\hypersetup{urlcolor=black, colorlinks=false, pdfborder = {0 0 0}}  % Colours hyperlinks in blue
+% Define enumerated description lists
+\usepackage{enumitem}
+\newcounter{descriptcount}
+\newcounter{descriptcount2}
+\newlist{enumdescript}{description}{2}
+\setlist[enumdescript,1]{%
+  before={\setcounter{descriptcount}{0}%
+          \renewcommand*\thedescriptcount{\arabic{descriptcount}.}}
+  ,font=\bfseries\stepcounter{descriptcount}\thedescriptcount~
+}
+\setlist[enumdescript,2]{%
+  before={\setcounter{descriptcount2}{0}%
+          \renewcommand*\thedescriptcount{\roman{descriptcount2}.}}
+  ,font=\bfseries\stepcounter{descriptcount2}\thedescriptcount~
+}
+ 
+
+ 
+%% ----------------------------------------------------------------
+\begin{document}
+\include{Variables}
+% For changes in supervisor, degree type, research group, etc. please change the Thesis.cls file
+\frontmatter      % Begin the book's numbering; frontpage
+%\pagenumbering{arabic}
+
+% Set up the Title Page
+\title  {\ThesisTitle}
+
+\authors  {\texorpdfstring
+            {\href{mailto:kalyvase@csd.auth.gr}{\Author - Student ID: 93}}
+            {\Author}
+            }
+\addresses  {\groupname\\\deptname\\\progname\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
+\date       {Date}
+\subject    {}
+\keywords   {}
+
+\maketitle
+
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % It is better to have smaller font and larger line spacing than the other way round
+
+% Define the page headers using the FancyHdr package and set up for one-sided printing
+\fancyhead{}  % Clears all page headers and footers
+\rhead{\thepage}  % Sets the right side header to show the page number
+\lhead{}  % Clears the left side page header
+
+\pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
+
+%% ----------------------------------------------------------------
+% Declaration Page required for the Thesis, your institution may give you a different text to place here
+\Declaration{
+
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+I, \Author, declare that this thesis titled, '\ThesisTitle' and the work presented in it are my own. I confirm that:
+
+\begin{itemize} 
+\item[\tiny{$\blacksquare$}] This work was done wholly or mainly while in candidature for a research degree at this University.
+ 
+\item[\tiny{$\blacksquare$}] Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
+ 
+\item[\tiny{$\blacksquare$}] Where I have consulted the published work of others, this is always clearly attributed.
+ 
+\item[\tiny{$\blacksquare$}] Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
+ 
+\item[\tiny{$\blacksquare$}] I have acknowledged all main sources of help.
+ 
+\item[\tiny{$\blacksquare$}] Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.
+\\
+\end{itemize}
+ 
+ 
+Signed:\\
+\rule[1em]{25em}{0.5pt}  % This prints a line for the signature
+ 
+Date:\\
+\rule[1em]{25em}{0.5pt}  % This prints a line to write the date
+}
+\clearpage  % Declaration ended, now start a new page
+
+%% ----------------------------------------------------------------
+% The "Funny Quote Page"
+\pagestyle{empty}  % No headers or footers for the following pages
+
+\null\vfill
+% Now comes the "Funny Quote", written in italics
+\textit{One day or day one. You decide.}
+
+\begin{flushright}
+Unknown
+\end{flushright}
+
+\vfill\vfill\vfill\vfill\vfill\vfill\null
+\clearpage  % Funny Quote page ended, start a new page
+%% ----------------------------------------------------------------
+
+% The Abstract Page
+\addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
+\abstract{
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+This thesis introduces a decentralized energy trading model implemented on a private blockchain network. It leverages blockchain technology in order
+to decentralize energy transactions and allow a local network to create its own energy market, controlled by the network participants. It gives the freedom
+to energy producers and consumers to make their own energy trading deals and define an energy price that is most convenient to both parties without any intermediates.
+These goals are achieved using a local Ethereum blockchain network, a decentralized application build on top of it and a web based user interface where users can interact
+with the decentralized application and perform energy transactions. The result of this research is a platform called PowerChain, that can be utilized to facilitated local 
+energy transactions using blockchain technology. The source code of the platform is open source and can be found in the following GitHub repository:
+\begin{center}
+  \url{https://github.com/MnAppsNet/PowerChain}
+\end{center}
+}
+
+\clearpage  % Abstract ended, start a new page
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
+
+% The Acknowledgements page, for thanking everyone
+\acknowledgements{
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+I would like to express my sincere gratitude to those who have made this thesis possible. First and foremost, my advisors, Prof. Athina Vakali and George Vlahavas, for their invaluable guidance, encouragement, and expertise throughout my research journey. 
+Their insightful feedback and unwavering support were instrumental in shaping this project.
+My thanks also extend to Aristotle University of Thessaloniki for providing me with the resources and support I needed to conduct my research.
+Finally, I would like to express my deepest gratitude to my family. Their love, encouragement, and understanding throughout this journey were more than words can express. 
+I am especially grateful to my beloved wife, who is always by my side, supporting me psychologically in every step.
+Without the support and guidance of these individuals, this thesis would not have been possible. I am deeply grateful to all of them.
+
+}
+\clearpage  % End of the Acknowledgements
+%% ----------------------------------------------------------------
+
+\pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
+
+
+%% ----------------------------------------------------------------
+\lhead{\emph{Contents}}  % Set the left side page header to "Contents"
+\tableofcontents  % Write out the Table of Contents
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Figures}}  % Set the left side page header to "List if Figures"
+\listoffigures  % Write out the List of Figures
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
+\listoftables  % Write out the List of Tables
+
+%% ----------------------------------------------------------------
+\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
+\clearpage  % Start a new page
+\lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
+\listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
+{
+\textbf{Acronym} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or \\
+\textbf{DER}  & Distributed Energy Resource \\
+\textbf{PV}   & Photovoltaic \\
+\textbf{P2P}  & Peer to Peer \\
+\textbf{P2G}  & Peer to Grid \\
+\textbf{VPP}  & Virtual power plant \\
+\textbf{CDA}  & Continuous Double Auction \\
+\textbf{TDDA} & Time Discrete Double Auction \\
+\textbf{BMG}  & Brooklyn Microgrid \\
+\textbf{BFT}  & Byzantine fault tolerant  \\
+\textbf{PBFT} & Practical Byzantine fault tolerant  \\
+\textbf{PoW}  & Proof of Work  \\
+\textbf{PoS}  & Proof of Stake  \\
+\textbf{PoA}  & Proof of Authority  \\
+\textbf{DSO}  & Distribute System Operator  \\
+\textbf{MCP}  & Market Clearing Price  \\
+\textbf{TTP}  & Trusted Third Party  \\
+\textbf{UTXO} & Unspent Transaction Output \\
+\textbf{EVM}  & Ethereum Virtual Machine \\
+\textbf{wh}   & Watt hour \\
+\textbf{kWh}  & kiloWatt hour \\
+
+}
+
+\lhead{}
+%% ----------------------------------------------------------------
+% End of the pre-able, contents and lists of things
+% Begin the Dedication page
+
+\setstretch{1.3}  % Return the line spacing back to 1.3
+
+\pagestyle{empty}  % Page style needs to be empty for this page
+\dedicatory{Dedicated to my wife who is always by my side...}
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+
+
+%% ----------------------------------------------------------------
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\pagestyle{fancy}  % Return the page headers back to the "fancy" style
+
+% Include the chapters of the thesis, as separate files
+% Just uncomment the lines as you write the chapters
+
+\input{Chapters/1.Introduction} % Introduction
+
+\input{Chapters/2.Fundamendals} %Fundamentals
+
+\input{Chapters/3.Background} % Review of the Literature
+
+\input{Chapters/4.Framework} % Framework
+
+\input{Chapters/5.Platform} % Platform
+
+\input{Chapters/6.Experimentation} % Experimentation
+
+\input{Chapters/7.Conclusions} % Results and Discussion
+
+%\input{Chapters/Chapter7} % Conclusion
+
+%% ----------------------------------------------------------------
+% Now begin the Appendices, including them as separate files
+
+\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+
+\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+
+% \input{Appendices/General_Notation} 
+% Example appendices
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+\backmatter % End the book's numbering; backpage
+
+%% ----------------------------------------------------------------
+\label{Bibliography}
+\lhead{\emph{Bibliography}}  % Change the left side page header to "Bibliography"
+\bibliographystyle{ACM-Reference-Format}
+% \bibliographystyle{unsrtnat}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
+\bibliography{Bibliography}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
+
+\end{document}  % The End
+%% ----------------------------------------------------------------
