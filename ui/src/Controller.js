@@ -99,7 +99,6 @@ class Controller {
         this.model.executeModifyStateMethod(
             (results) => {
                 console.log(results);
-                this.isVoter();
                 this.getVotes(this.address);
             }, Blockchain.METHODS.REMOVE_VOTER, address)
     }

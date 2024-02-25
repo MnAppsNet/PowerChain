@@ -89,12 +89,13 @@ contract Tools {
     function EEURO_LOCKED(uint256 amnt) public pure returns(string memory){return concat(amnt, " eEuro locked");}
     function EEURO_UNLOCKED(address addr, uint256 amnt) public pure returns(string memory){return concat(concat(amnt, " eEuro unlocked into "),addr);}
     function VOTE(int vote, string memory voteString) public pure returns(string memory){
-        return (vote == 1)
-                ? concat(
+        if (vote == 1)
+            return concat(
                     concat("You are in favor of: '", voteString),
                     "'. Execute the method again to change your mind."
-                )
-                : concat(
+                );
+        else
+            return concat(
                     concat("You are against of: '", voteString),
                     "'. Execute the method again to change your mind"
                 );

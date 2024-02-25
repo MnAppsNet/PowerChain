@@ -1,5 +1,6 @@
 import React from "react"
 import PanelList from "../PanelList.js";
+import Blockchain from "../../Blockchain.js";
 
 const Tokens = (props) => {
     const controller = props.controller;
@@ -35,6 +36,9 @@ const Tokens = (props) => {
                         type: "number",
                         title: controller.strings.transfer,
                         label: controller.strings.transfer,
+                        info: [
+                            controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.ENT]+" "+Blockchain.TOKENS.ENT,
+                        ],
                         inputItems: [{
                             id: "account",
                             text: controller.strings.accountAddress,
@@ -68,10 +72,13 @@ const Tokens = (props) => {
                         type: "number",
                         title: controller.strings.transfer,
                         label: controller.strings.transfer,
+                        info: [
+                            controller.strings.available + ": "+controller.balance[Blockchain.TOKENS.EUR]+" "+Blockchain.TOKENS.EUR,
+                        ],
                         inputItems: [{
                             id: "account",
                             text: controller.strings.accountAddress,
-                            type: "text",
+                            type: "text",http://localhost:3000/#
                             default: ""
                         }, {
                             id: "amount",

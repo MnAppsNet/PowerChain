@@ -73,7 +73,11 @@ contract Voters{
     function getVotes(address addr) public view returns(UserInfo[] memory){
         require(msg.sender == _owner,"Not allowed to execute this method");
         require(_voters[addr],"You are not a voter");
-        return _userVoteStrings[addr]; 
+        UserInfo[] memory votes = _userVoteStrings[addr];
+        for(uint i = 0; i < votes.length; i++){
+            votes[i].passed = isVotePassed(_userVoteStrings[addr][i].vote);
+        }
+        return votes;
     }
     function checkIfVoteIsPassed(uint count) internal view returns(bool){
         return ( (count*10 / _VotersNumber) > 5);
@@ -100,9 +104,6 @@ contract Voters{
             _userVoteStrings[addr][_userVoteExists[addr][vote]-1] = UserInfo(vote,_votes[vote].userVotes[addr],passed);
         }
         _votes[vote].passed = passed;
-        for(uint i = 0; i < _userVoteStrings[addr].length; i++){
-            _userVoteStrings[addr][i].passed = isVotePassed(_userVoteStrings[addr][i].vote);
-        }
         return voteVal;
     }
     function isVotePassed(string memory vote) public view returns (bool){

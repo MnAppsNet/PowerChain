@@ -48,7 +48,7 @@ const Popup = (props) => {
                     if (match.includes(key))
                         match = match.replace(key,value);
                     try{
-                        return Parser.evaluate( match.replace("{","").replace("}",""),controller)
+                        return (Parser.evaluate( match.replace("{","").replace("}",""),controller)).toFixed(3)
                     }catch{ return ""; }
             })
         }
