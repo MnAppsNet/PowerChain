@@ -78,7 +78,7 @@ const Tokens = (props) => {
                         inputItems: [{
                             id: "account",
                             text: controller.strings.accountAddress,
-                            type: "text",http://localhost:3000/#
+                            type: "text",
                             default: ""
                         }, {
                             id: "amount",
