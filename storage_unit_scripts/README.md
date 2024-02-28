@@ -1,0 +1,2 @@
+This script is used to simulate energy production and consumption report to the PowerChain smart contract.
+This activity should be carried out automatically by a smart meter of a storage unit that monitors the input and output on energy.
