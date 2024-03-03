@@ -1,4 +1,5 @@
 \chapter{Literature Review} \label{literature}
+\label{chapter3}
 In this chapter we will present different energy trading models proposed in literature
 and their limitations. On each of the presented models, we will focus on two different
 aspects:
@@ -87,7 +88,7 @@ cleared as described in the market layer section above.
 \subsection{Limitations}
 This design has some limitations that need to be considered:
 \begin{itemize}
-    \item The way the market is designed in hourly intervals, doesn't allow for inter-temporal commitments. This means that only energy needs of the next our can be covered
+    \item The way the market is designed in hourly intervals, doesn't allow for inter-temporal commitments. This means that only energy needs of the next hour can be covered
           and no energy trading planning for different time periods could be made.
     \item The market clearing price algorithm is very simplistic, alternative approaches need to be explored
     \item Prosumers might not be truthful about their hour ahead energy production or the forecasting might have some errors. This can lead to violations to the energy trading
@@ -207,16 +208,17 @@ NRGCoin is a virtual currency backed by renewable energy production. It is a mec
 by making it more profitable for producers and utilities and cheaper for consumers and governments.
 It allows local renewable energy producers to earn NRGcoins directly from their energy output, without depending on the market price or extra battery storage.
 The NRGcoins can then be traded on an open market for their monetary equivalent at any time.\\
-Information about the local energy production and consumption is sent every 15 minutes from the smart meters of the peers to the
-street level low-voltage energy substation of the DSO. This information is used to determine the rates at which prosumers are rewarded with NRGCoins and
-consumers are billed for energy withdrawal. These rates are determined buy the street-level substations that follows the NRGCoin protocol.
-\cite{NRGCoin}
-
 \begin{figure}[h!]
     \centering
     \includegraphics[scale=0.8]{Figures/nrgcoin.png}
     \caption{NRGCoin Schematic Setup \cite{NRGCoin}}
 \end{figure}
+
+Information about the local energy production and consumption is sent every 15 minutes from the smart meters of the peers to the
+street level low-voltage energy substation of the DSO. This information is used to determine the rates at which prosumers are rewarded with NRGCoins and
+consumers are billed for energy withdrawal. These rates are determined buy the street-level substations that follows the NRGCoin protocol.
+\cite{NRGCoin}
+
 
 \subsection{Market Layer}
 
@@ -321,7 +323,7 @@ The main limitations we notices with this model are the following:
 \section{Comparison}
 \label{sec:comp}
 Based on the reviewed literature, we can distinguish two different approaches to the energy trading problem.
-One is the direct energy trading and the other is the pegging of a token to the energy value.
+One is the direct energy consumption and the other is the pegging of a token to the energy value for indirect energy consumption.
 In the first approach, production and consumption forecasting is needed in order to match
 energy trading needs of the peers while on the other an energy storage solution is needed.
 
@@ -337,16 +339,17 @@ energy trading needs of the peers while on the other an energy storage solution 
         \textbf{Consensus}      & BFT                                         & BFT                                  & PoS                                   & PoW                                         \\[5pt]
         \textbf{Market}         & MCP                                         & DeMarket                             & Open currency                         & CDA                                         \\
                                 & (average buy offer)                         & pool-based                           & exchange                              &                                             \\[5pt]
-        \textbf{Energy Trading} & Direct                                      & Direct                               & Indirect                              & Direct                                      \\
-                                &                                             &                                      & Backed by MBRCoin                     &                                             \\[5pt]
+        \textbf{Energy Consumption} & Direct                                      & Direct                               & Indirect                              & Direct                                      \\
+                                &                                             &                                      & Backed by NRGCoin                     &                                             \\[5pt]
     \end{tabular}
     \caption{Comparison of mentioned approaches}
 \end{table}
 
 \section{Summarization}
-The investigated four distinctive models for decentralized energy trading, leveraging blockchain technology. We discussed about a private Hyperledger Fabric blockchain implementation that employs Byzantine Fault Tolerance (BFT) 
-consensus for hourly direct energy trading, with limitations in inter-temporal commitments and potential forecasting inaccuracies. A private Hyperledger Burrow blockchain implementation called "DeTrade", focusing on direct energy 
-trading with an emphasis on inter-temporal commitments. "NRGCoin" which follows a different energy trading paradigm, pegging a virtual currency to renewable energy production, though it faces limitations in reliance on existing 
-energy transfer infrastructure. Finally, we also discussed about an energy trading implementation employing the CDA market mechanism. It uses Bitcoin protocol with the concept of colored coins to achieve direct energy trading but 
-it is facing challenges with Bitcoin's low block finality. Each model offers distinct approaches to address decentralized energy trading complexities, with the choice contingent on factors like decentralization preference and 
-specific energy market requirements.
+We investigated four distinctive models for decentralized P2P energy trading, leveraging blockchain technology. We discussed about a private Hyperledger Fabric blockchain implementation that employs Byzantine Fault Tolerance (BFT) 
+consensus for hourly direct energy consumption, with limitations in inter-temporal commitments and potential forecasting inaccuracies. A private Hyperledger Burrow blockchain implementation called "DeTrade", focusing on direct energy 
+consumption with an emphasis on inter-temporal commitments. We also discussed about NRGCoin, which follows a different energy trading paradigm, pegging a virtual currency to renewable energy production, though it faces limitations in reliance on existing 
+energy transfer infrastructure. Finally, we also discussed about an energy trading implementation employing the CDA market mechanism. It uses Bitcoin protocol with the concept of colored coins to achieve direct energy consumption but 
+it is facing challenges with Bitcoin's low block finality. Each model offers distinct approaches to address decentralized energy trading complexities, with the choice contingent on factors like decentralization preference and specific energy market requirements.
+The main limitation we addressed with these models, is with the forecasting required by the direct energy consumption paradigm. Energy production and consumption need to be forecasted for the trading deals to be possible, as the actual energy production
+and consumption happens in the future on a later stage.

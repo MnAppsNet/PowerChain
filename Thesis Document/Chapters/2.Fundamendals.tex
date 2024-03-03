@@ -1,4 +1,5 @@
 \chapter{Fundamentals} \label{fandamentals}
+\label{chapter2}
 In this chapter, we will delve into the foundational aspects of blockchain technology and P2P energy trading.
 Initially, we will clarify the concept of a smart contract and explore its life cycle. Following that, we will introduce the most popular consensus mechanisms
 and various blockchain platforms, examining their distinctions. Finally, we will outline the P2P energy trading paradigm,
@@ -357,7 +358,7 @@ attachment to the community as the participants have a direct connection with ea
         Environmental   & Emphasizes renewable energy           & May or may not prioritize           \\
         Impact          & usage, sustainability and             & renewable energy sources            \\
                         & local energy production               & and sustainability                  \\[5pt]
-        Regulatory      & Can face hurdles dut to evolving      & Complience with energy policies     \\
+        Regulatory      & Can face hurdles dut to evolving      & Compliance with energy policies     \\
         Challenges      & energy market regulations             & and regulations is more established \\[5pt]
         Scalability and & Can be more scalable, efficient and   & May face challenges in adapting to  \\
         Efficiency      & adaptable to localized energy needs   & rapid changes or catering to        \\
@@ -378,7 +379,7 @@ A microgrid market is usually classified by three main processes :
 
 In the following subsections, different market clearing methods will be presented.
 
-\subsubsection{Continuous Double Auction (CDA)}
+\subsubsection*{Continuous Double Auction (CDA)}
 Most P2P trading platforms are making use of the continuous double auction design for their market layer.
 In a CDA market, buyers and sellers can submit their bids at any time of the trading period and
 market clears continuously. Buyers' bids are ordered in a descending order, from highest to lowest,
@@ -432,7 +433,7 @@ ask, a transaction is happening with the transaction price being equal to the av
 outstanding ask. This process is called one round of transactions and at least one transaction occurs during that process. In the above table we can see that one round of transactions
 is performed which includes two transactions, the one between B1 and S1 for 3 energy units and the one from B1 to S2 for 1 energy unit. \cite{wang2017novel}
 
-\subsubsection{Time Descrete Double Auction (TDDA)}
+\subsubsection*{Time Descrete Double Auction (TDDA)}
 
 In a TDDA market, transaction happens at discrete time intervals rather than continuously. Specific time intervals are specified when the participants can make their buying or selling
 bids. At the end of this time interval, the system matches buy and sell order based on the outstanding bids and the outstanding asks, like the CDA market. TTDA is more or less and
@@ -445,3 +446,9 @@ activities like charging and discharging batteries or running appliances like wa
 single quantity and price within a single time step. Consequently, this restricts prosumers to just one specific time slot for buying and selling energy. These limitations also
 impact the participation of flexible local devices, such as battery storage systems, which often require specific charging patterns or continuous operation to maintain their
 efficiency and prolong their lifespan. \cite{DeTrade}
+
+\section{Summarization}
+In this chapter, we analyzed the fundamentals of blockchain technology and P2P energy trading networks. We explored various aspects of a blockchain network, such as the consensus mechanisms, 
+smart contracts, and accessibility: whether it is publicly accessible or restricted to selected individuals. Additionally, we compared and analyzed the most popular blockchain platforms like 
+Bitcoin, Ethereum, and Hyperledger Fabric. Finally, we discussed the architectures of a P2P energy trading network, comparing them to conventional energy markets, and analyzed some popular market 
+maker mechanisms used within such networks.

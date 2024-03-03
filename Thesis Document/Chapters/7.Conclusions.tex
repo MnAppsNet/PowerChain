@@ -1,18 +1,59 @@
 \chapter{Conclusions \& Future Work} \label{conclusions}
 This research successfully implemented a decentralized energy trading model called PowerChain, utilizing a private blockchain network. 
-The results demonstrate the feasibility of our model in facilitating secure, transparent, and traceable energy asset exchange within a local network. 
-While PowerChain was proven to be a feasible energy trading model theoretically, more research is needed to practically implement it in a real world 
-scenario.\\
+The results demonstrate the feasibility of our model in facilitating secure, transparent, and traceable energy asset exchanges within a local network.
+Using a private blockchain network with known participants we reinforce the security aspect of the implementation. By nature of blockchain technology we
+achieve transparent and traceable energy asset exchanges as every transaction in the network is known and visible to all participants. Like the rest of the P2P
+energy trading implementations in literature, PowerChain addresses effectively the problems that arise from the traditional energy market (refer to section \ref{problems})
+and improves upon existing literature by introducing a novel architecture.
+
+\section{PowerChain Novelty}
+In comparison with existing energy trading models in literature that leverages blockchain technology, PowerChain offers some unique characteristics.
+It introduces a novel framework incorporating the energy storage layer and storage provider concept. 
+The primary challenge it tries to tackle, is related to the error-prone forecasts required by direct energy consumption architecture which is prevalent among solutions in literature. 
+Apart from the fact that forecasts can be susceptible to errors, tt could also be that producers or consumers try to manipulate the energy market by purposely 
+providing false energy predictions. The introduction of the energy storage layer can resolve these issues as there is no need for energy forecasts anymore.
+Producers are getting rewarded to provide energy to the energy storage layer and consumers buy from the already available energy of the network. Although this solution
+tackles efficiently the energy forecasting issues, it comes also with its challenges. 
+
+\section{PowerChain Challenges and Limitations}
+The main challenge of PowerChain is the fact that storage units need to maintain large batteries for the storage of energy. The storage layer of the network need to have sufficient energy 
+storage capacity for the network needs and constantly increase it based on the demands. This brings a high cost on the setup and maintenance of the network. PowerChain tries to tackle this 
+challenge by applying a storage provider fee, to incentivize users to provide energy storage to the network. Its biggest limitation is the reliance on batteries for the energy trades 
+and the high cost this introduces to the network setup and maintenance. With the advancements of battery technology, these costs could be reduces and the energy could be stored more efficiently with higher
+energy density batteries.\\ 
+
+\section{Future Work}
+In this section we are highting some open topic of this study that could be research material for future work. Below we enumerate these topics and describe them in more details.
+\begin{enumerate}
+    \item Research on the implementation of the smart meters that are responsible of reporting energy consumption and production events to the PowerChain smart contract.
+    \item Integration of PowerChain networks with each other and this existing public EVM compatible blockchains.
+    \item Investigation into the bridging of legal currencies into the private PowerChain network.
+    \item Investigate the possibility of implementing a hybrid architecture that allows for both direct and indirect energy consumptions.
+    \item Research on the current state of battery technology and the actual cost to setup and maintenance a network leveraging PowerChain architecture.
+\end{enumerate}
+\subsection*{Smart Meters}
+While PowerChain was proven to be a feasible energy trading model theoretically, more research is needed to practically implement it in a real world scenario.
 Our research was mostly focused on the blockchain layer and the handling of network assets but there is also more investigation needed on the
 physical devices that can implement the model in practice. One such device is the smart meter which is an IoT device, controlling a blockchain address, 
 responsive to monitor energy production/consumption and report them to the blockchain network. It is a very important part of the network
-because it works as an interface between the digital assets and the actual energy production and consumption. More research is needed on how to setup such
-devices and how to make sure that the metrics they report can not be tampered with and will always represent the actual metrics with a sufficiently high accuracy.\\
-Another aspect that need to be studied further, is the integration of a PowerChain instance with other remote PowerChain instances or even with other public EVM compatible blockchains.
-In this study we presented an initial draft of an integration solution in chapter \ref{integration} but more investigation is needed. The integration of a PowerChain instance
-with other instances will open the doors to energy trade deals between energy trade communities, allowing to export and import energy to each other. The option to integrate with
-public blockchains will allow the bridging of existing assets from the public blockchain into the local PowerChain network. Such assets could be a stable coin that can be used
-for the trading of ENT tokens and thus avoid putting trust in a trusted authority to bring EUR assets into the network.\\
-A final suggestion for future work, would be to give the possibility to replace the banker role with a community fund. The banker role in the PowerChain network has a lot of power
-can could potentially exploit the network. Using the voter roles, it would be possible to implement a community fund that is controlled by many people in the network instead of a
-central trusted authority.
+because it works as an interface between the digital assets and the actual energy movements. More research is needed on how to setup such
+devices and how to make sure that the metrics they report can not be tampered with and will always represent the actual metrics with a sufficiently high accuracy.
+\subsection*{PowerChain Integration}
+Another aspect that need to be studied further, is the integration of a PowerChain network instance with other remote instances or even with other public EVM compatible blockchains.
+In this study we presented an initial draft of an integration solution, in chapter \ref{integration}, but more investigation is needed about its feasibility. The integration of a PowerChain instance
+with other instances will open the doors to energy trade deals between energy communities, allowing to export and import energy to each other. The option to integrate with
+public blockchains will allow the bridging of existing assets from the public blockchain into the local PowerChain network. Such asset could be a stable coin that can be used
+for the trading of ENT tokens and thus avoid putting trust in a trusted authority to bring EUR assets into the network.
+\subsection*{Bridging legal currencies into the private network}
+Additional investigation is also needed on the bridging of real world currencies into the private blockchain network. The banker role, introduced in the PowerChain protocol to bridge currency assets into
+the private network, has a lot of power and could potentially exploit the network. An improvement on top of the banker role, would be the implementation of a community fund powered by the voter role and thus
+network voters would collectively agree on the minting and burning of currency assets.
+\subsection*{Investigation of hybrid solutions}
+The merging of direct and indirect energy consumption architectures would also be an interesting study subject. The integration of direct energy consumption on top of the indirect one proposed by PowerChain,
+could help mitigate some of the limitations of both architectures. Network peers could rely on energy forecast for the energy trades and a storage layer could provide a backup when a contract is breached due to
+forecasting errors. In addition direct energy trades could help reduce some of the battery related costs by reducing the required network storage capacity.
+\subsection*{State of battery technology and the costs to setup a PowerChain network}
+While in theory PowerChain seems like a good solution for implementing a P2P energy trading network, more research is needed on the costs related to a practical setup of the network. The current state of battery technology
+need to be investigated along with the efficiency, energy density and cost of state of the art batteries. In addition, there is the need to collect and analyze real world energy consumptions of a local community in order to
+understand what is the required energy storage capacity of a PowerChain network and what are the costs related to purchasing and maintaining the relevant amount of batteries. Based on the results of such a study, we can
+calculate what would be the most appropriate values for the PowerChain network parameters (refer to section \ref{networkParameters}) in order to incentivize all network peers to continue using and improve upon the network.

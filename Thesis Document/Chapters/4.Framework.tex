@@ -1,7 +1,8 @@
 \chapter{Implementation Framework for an energy trading platform using blockchain technology} \label{framework}
-
-In this chapter we will go through our proposed energy trading platform architecture. We will analyze the market and blockchain layers of our implementation and will
-discuss about the different roles in the energy trading network.
+\label{chapter4}
+In this chapter we go through our proposed energy trading architecture. We analyze the layers of our implementation and
+discuss about the different aspects of our solution like the network roles, the network tokens and their minting and burning mechanism and finally we mention
+possible integration solutions with other networks.
 
 \section{Overview}
 After reviewing the current literature in regards to energy trading using blockchain technology, we introduce a novel energy trading platform that tries
@@ -10,7 +11,7 @@ generation and consumption forecast. Most prosumers make use of renewable energy
 This makes it very challenging to produce good energy generation predictions which can cause issues with a direct energy trading approach. The actual energy
 generated during the energy consumption period might be less than the energy trading agreement made with a consumer during the trading period. This causes the need
 for the microgrid to be connected to the main grid to buy any extra energy need or even sell any excess energy that was not actually consumed.
-The model we will introduce in the next sections replies on an indirect energy trading paradigm and introduces the role of storage provider in the microgrid.
+The model we will introduce in the next sections relies on an indirect energy trading paradigm and introduces the role of storage provider in the microgrid.
 This new role will be responsible to store the energy produced by the network.\\
 The main challenges we are trying to address with our proposed model are the following:
 \begin{itemize}
@@ -39,8 +40,9 @@ In the following chapters more details will be presented for the different aspec
 \pagebreak
 
 \subsection{PowerChain Layers}
-PowerChain defines two different type of layers, the physical layers and the information layers. The information layer works on top of the physical layer and its
-responsibility is to orchestrate the physical layer interactions. We recognize three physical layers and two information layers which are analyzed below.\\
+PowerChain defines two different type of main layers, the physical layers and the information layers. The information layer works on top of the physical layer and its
+responsibility is to orchestrate energy consumption, production and storage. The physical layer consists of the energy storage batteries, the energy production units 
+and the energy consumers. We recognize three physical layers and two information layers which are analyzed below.\\
 
 \begin{figure}[h!]
     \centering
@@ -52,7 +54,7 @@ responsibility is to orchestrate the physical layer interactions. We recognize t
 \begin{itemize}
     \item \textbf{Production Layer}: This layer consists of all the energy production units that exist in the microgrid. It's a very crucial layer of the architecture as it
           produces the network's energy.
-    \item \textbf{Storage Layer}: This layer is comprised by all the energy storage units of the microgrid. The energy produces by the production layer is stored in the storage
+    \item \textbf{Storage Layer}: This layer is comprised by all the energy storage units of the microgrid. The energy produced by the production layer is stored in the storage
           layer for later consumption.
     \item \textbf{Consumption Layer}: It is made of all the peers that consume energy from the storage layer.
 \end{itemize}
@@ -60,16 +62,16 @@ responsibility is to orchestrate the physical layer interactions. We recognize t
 \textbf{Information Layers:}
 \begin{itemize}
     \item \textbf{Blockchain Layer}: The blockchain layer is the heart of the PowerChain protocol. It facilitates all the necessary functionality to digitize the produced energy and
-          and make it tradable through smart contracts.
+          make it tradable through smart contracts.
     \item \textbf{Market Layer}: In the market layer, the digitized energy is getting traded between the peers. This layer could be completely separated from the blockchain layer. It consists
-          of all the possible ways the digitized energy could be traded. PowerChain provides also a market platform that can be used initiate trades.
+          of all the possible ways the digitized energy could be traded. PowerChain provides also a market platform that can be used to initiate trades.
 \end{itemize}
 
 \subsection{Network Roles}
-In literature, two roles are usually defined in an energy trading network, the one of consumer and the one of both producer and consumer called prosumer.
-Except from the roles of energy producer and consumer we also define the role of energy storage provider. In more detail:
+In literature, two roles are usually defined in an energy trading network, the consumer and the consumer/producer called prosumer.
+Apart from the roles of energy producer and consumer we also define the role of energy storage provider. In more detail:
 \begin{itemize}
-    \item \textbf{The consumer}, is buying and consuming the available energy of the network. The available energy of the network is stored by the storage providers.
+    \item \textbf{The consumer}, is buying and consuming the available energy of the network which is stored by the storage providers.
     \item \textbf{The producer}, is producing network's energy using energy generation units like PVs. The produced energy is send to the storage providers for storage.
     \item \textbf{The storage providers}, are receiving the energy from producers and they are storing it in batteries.
 \end{itemize}
@@ -85,10 +87,10 @@ a percentage of the gains. The gains are in the form of digital energy tokens, c
 PowerChain defines two different type of tokens in the network:
 \begin{itemize}
     \item \textbf{Energy Token}: The energy token is a token backed by the Network's stored energy. A single energy token corresponds to specific kilowatt-hours (kWh) of energy. It digitizes the energy of the network and thus making 
-    it exchangeable and transactable. It is the heart of the whole network as it represents the actual energy that is produced, consumed and transacted. To link the energy token value with the actual energy of the network, we deploy
+    it exchangeable and transactable. It is the heart of the whole network as it represents the actual energy that is produced, consumed and transacted. To link the energy token value with the actual energy of the network, we make use of
     a token minting and burning mechanism, described in more details in the following section.
-    \item \textbf{Currency Token}: The currency token is a taken backed by a real work currency which could be for example Euro, Dollar, Pound or any other. One currency token corresponds to exactly one unit of the backed currency.
-    The existence of a currency token, is important for the network in order to enable token exchanges. Energy producers that want to sell their energy, they need to sell their energy tokens while energy consumers need to buy energy
+    \item \textbf{Currency Token}: The currency token is backed by a real work currency which could be for example Euro, Dollar, Pound or any other legal currency. One currency token corresponds to exactly one unit of the backed currency.
+    The existence of a currency token, is important for the network in order to enable token exchanges. Energy producers that want to sell their energy, need to sell their energy tokens while energy consumers need to buy energy
     tokens to consume the corresponding energy. The currency token is what brings real world currencies into the network to make this exchange possible. In the following chapter we describe how to bridge a real world currency into the
     network.
 \end{itemize}
@@ -97,7 +99,7 @@ In the following sections, more details are provided for the minting and burning
 
 \subsubsection{Minting/Burning of ENT tokens}
 ENT tokens are minted every time energy is stored in the storage layer. For every kWh of energy stored in the storage layer, an amount of ENT tokens are minted into the wallets of the producer and the storage provider. For every kWh consumed from the
-storage layer, an amount of ENT is burned. The amount of ENT tokens minted or burned is determined by the PowerChain smart contract and is a function of the total ENT tokens in circulation and the total kWhs of energy stored in the storage layer.
+storage layer, an amount of ENT is burned. The amount of ENT tokens minted or burned is determined by the PowerChain smart contract and is a function of the total ENT tokens in circulation and the total kWh of energy stored in the storage layer.
 We define the minting and burning functions as follows:
 \begin{empheq}[box=\fbox]{align}
             \textrm{ENT}_{mint} &=
@@ -118,12 +120,14 @@ We define the minting and burning functions as follows:
 \end{empheq}
 Where,\\
 \begin{tabular}{rl}
-    $\textrm{ENT}_{mint}$ & :  ENT tokens to be minted per kWh produced kWh. \\
-    $\textrm{ENT}_{burn}$ & :  ENT tokens to be burned per kWh consumed kWh.    \\
-    $R$                   & :  The amount of ENT to be paid as cost for minting or burning ENT. \\
-    $\textrm{KWH}$        & :  Total kWhs stored in storage layer.       \\
+    $\textrm{ENT}_{mint}$ & :  ENT tokens to be minted per kWh produced. \\
+    $\textrm{ENT}_{burn}$ & :  ENT tokens to be burned per kWh consumed.    \\
+    $R$                   & :  The amount of ENT to be paid as cost for minting/burning ENT \\
+                          &    for each kWh produced/consumed. \\
+    $\textrm{KWH}$        & :  Total kWh stored in storage layer.       \\
     $\textrm{ENT}$        & :  Total ENT tokens in circulation.          \\
-    $C$                   & :  A constant where $0<c<1$. Defines the percentage of energy loss to be covered.                 \\
+    $C$                   & :  A constant where $0<c<1$. Defines the percentage of energy loss \\ 
+                          &    to be covered per kWh produced/consumed. \\
     $M$                   & :  The maximum ENT/kWh minting cost.          \\
     $B$                   & :  The maximum ENT/kWh burning cost.         \\
 \end{tabular}\\
@@ -154,18 +158,17 @@ Where,\\
         \addplot[domain=2.5:60,color=black]{0.5};
         \end{axis}
       \end{tikzpicture}
-    \caption{Minting/burning cost for 1 ENT based on difference between total kWh and total ENT in the network, for different values of C with M = B = 0.5 ENT}
+    \caption{ENT Minting/burning cost for 1 kWh produced/consumed versus the difference between total kWh and total ENT in the network, for different values of C with M = B = 0.5 ENT/kWh}
 \end{figure}
 
-The reason we set a cost for minting and burning ENT tokens, is to try to keep the ratio between the total kWh and the total ENT in the network, to 1. Let's consider that for every produced kWh we mint 1 ENT token, in this situation for every $X$ kWhs stored we will have $X$ amount of ENT tokens. 
-The problem arises when we lose energy due to a potential battery disfunction. In such situation, we will have $Y<X$ kWhs available while there are still $X$ amount of ENT tokens in circulation. By applying the minting and burning
+The reason we set a cost for minting and burning ENT tokens, is to try to keep the ratio between the total kWh and the total ENT in the network, to 1. Let's consider that for every produced kWh we mint 1 ENT token, in this situation for every $X$ kWh stored we will have $X$ amount of ENT tokens. 
+The problem arises when we lose energy due to a potential battery disfunction. In such situation, we will have $Y<X$ kWh available while there are still $X$ amount of ENT tokens in circulation. By applying the minting and burning
 functions mentioned above, more tokens will be burned per kWh spent and less tokens will be minted per kWh generated until an equilibrium is reached. This is achieved through the cost function R which adds a cost to every minting 
-and burning of ENT tokens in order to keep the total kWh of the storage layer equal to the total ENT in circulation. The constant $C$, defines the percentage of the missing energy to be covered during minting or a burning of tokens. The higher the value of the constant, 
+and burning of ENT tokens in order to keep the total kWh of the storage layer equal to the total ENT in circulation. The constant $C$, defines the percentage of the missing energy to be covered during minting or burning of tokens. The higher the value of the constant, 
 the faster equilibrium will be reached but the higher the ENT cost for the individuals, meaning that in practice less network participants are going to cover the loss.\\
 The issue with the above mentioned equations, is that we approach equilibrium asymptotically because on each step we cover a fraction of the difference and as we progress that fraction tends to zero. To reach equilibrium in a finite amount of steps and keep the energy loss cost distribution fair, 
 the cost $R$ is calculated only when the difference between total kWh and total ENT tokens increase. This means that for every decrease of the difference between these two values, the $R$ value will remain the same until equilibrium is reached or the difference increases again. 
 Having this in mind, we calculate the number of kWh $n_t$, that need to be produced or consumed, at a particular time t, until we reach equilibrium, if the difference between the total ENT in circulation and the total available energy in the system, at the time $t$, is $D_t$ and the initial difference that set the cost $R$ is $D_0$. 
-For every kWh produced or consumed, the difference between the total kWh and the total ENT tokens in circulation, is reduced by the cost $R$. This means that after $n$ kWh consumed or produced, the difference will be zero.
 \begin{center}
     \begin{math}
         \begin{array}{c}
@@ -177,6 +180,7 @@ For every kWh produced or consumed, the difference between the total kWh and the
         \label{equ:kwh_until_equilibrium}
     \end{equation}
 \end{center}
+For every kWh produced or consumed, the difference between the total kWh and the total ENT tokens in circulation, is reduced by the cost $R$. This means that after $n_t$ kWh consumed or produced, the difference will be zero.
 
 \subsubsection{Minting/Burning of eEuro tokens}
 For the minting of eEuro tokens, a trusted authority is needed. The role of this trusted authority would be to mint new eEuro tokens into the blockchain network as well as burn them. This
@@ -185,14 +189,13 @@ For every newly minted eEuro token in the blockchain network, one real world Eur
 and can be transferred only within the network. When the trusted authority burns the eEuro, it can no longer be used in the blockchain network and real world Euro is unlocked and moved back into circulation.
 The network peers can give real world Euro to the trusted authority to mint them the equivalent amount in eEuro and can also burn an amount of eEuro to get real wold Euro back from the trusted authority.
 Such a trusted authority could be a certified bank or even a treasury account run by the community.\\
-
 \subsection{Blockchain Layer}
-The blockchain layer is where the PowerChain protocol is implemented and it's also where the actual energy and monetary transactions are happening. The PowerChain protocol defines the rules based on which the network tokens are minted,
-burned and transferred. It is implemented using a SmartContract and thus it is necessary to use a SmartContract capable blockchain platform.
-PowerChain uses a private blockchain due to the nature of local energy trading. The decision to use private blockchain was made because we only want to enable the trade of generated energy only locally. A private
+The blockchain layer, is a sub-layer of the information layer, and is where the PowerChain protocol is implemented. On this level, the actual energy and monetary transactions are happening. The PowerChain protocol defines the rules based on which the network tokens are minted,
+burned and transferred. It is implemented using a smart contract and thus it is necessary to use a smart contractc apable blockchain platform.
+PowerChain uses a private blockchain due to the nature of local energy trading. The decision to use private blockchain was taken because we only want to enable the trade of generated energy locally. A private
 blockchain would be more secure in that setup as everyone participating in the network would need to be authorized first by the local community.\\
 The blockchain platform we will use for PowerChain is Ethereum with a PoA consensus mechanism. We decided to implement PowerChain on Ethereum due to its active community and because our smart contracts will be directly compatible with the
-existing public Ethereum network. In this setup, it could be possible for our local Ethereum network to interact with the public one to enable the trading of energy tokens in a global network. More details on such integration will be
+existing public Ethereum network. In this setup, it could be possible for our local Ethereum network to interact with the public one and enable the trading of energy tokens in a global network. More details on such integration will be
 discussed in the next chapters. The decision to use PoA consensus mechanism is to achieve greater stability and security in the network. PoA is also a more suitable fit for a local network with known participants. \cite{manolache2022decision} \\
 Despite the fact that we refer to a local community and to local energy trading, PowerChain is not limited to only local energy transactions. It could be possible to initiate transactions between two PowerChain instances of two different
 energy trading communities. Different techniques could be explored to connect two private blockchain networks and initiate transactions with one another. More details will be presented on PowerChain integration chapter.
@@ -205,7 +208,7 @@ their asking bid, meaning the price they would like to be paid per ENT token. Fo
 ordered from highest to lowest, while bids from consumers from lowest to highest. Then a "price first and time first" principle is applied and the orders are cleared based on the given
 bids.\\
 Except from the market platform provided by PowerChain, the trade of ENT tokens can happen also by any other mean. It could be possible for two network peers to meet physically and
-and exchange ENT tokens for cash. It could also be possible to trade the token in another trading platform, assuming that ENT token could be available at that platform. The market layer of PowerChain 
+exchange ENT tokens for cash. It could also be possible to trade the token in another trading platform, assuming that ENT token could be available on that platform. The market layer of PowerChain 
 describes any possible way ENT token could be traded in the market and not only the PowerChain market platform.
 
 \subsection{PowerChain Integration} \label{integration}
@@ -240,7 +243,7 @@ The integration smart contract consists of the following methods:\\
 \end{table}
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.4]{Figures/PowerChain_Integration.png}
+    \includegraphics[scale=0.35]{Figures/PowerChain_Integration.png}
     \caption{PowerChain Integration}
 \end{figure}
 \\ 
@@ -254,3 +257,8 @@ The token transfer between the networks happens in the following stages:
     \item Tokens are unlocked or generated by the integration smart contract of network $B$ and transferred to the public address of $U_2$
     \item The integration service calls the method \textbf{TokensTransferred} of network $A$ to mark the token transfer as complete.
 \end{enumerate}
+\pagebreak
+\section{Summarization}
+In this chapter, we analyzed the main limitations we are trying to address with our proposed architecture and then presented all the components of our solution. We went through the information and physical
+layers of the architecture and analyzed the network roles and tokens. We discussed in more details about the minting and burning mechanism of the tokens and delve deeper into the blockchain and market layers.
+Finally, we proposed a possible integration architecture that could allow the interconnection of multiple energy trading networks that use our proposed solution.
